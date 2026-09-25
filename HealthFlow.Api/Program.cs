@@ -1,4 +1,14 @@
+using HealthFlow.Data.Contexts;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString =
+    builder.Configuration.GetConnectionString("HealthFlowConnection");
+
+builder.Services.AddDbContext<HealthFlowDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
 
 // Add services to the container.
 
