@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HealthFlow.Model\HealthFlow.Model.csproj" />
+    <ProjectReference Include="..\HealthFlow.Repository\HealthFlow.Repository.csproj" />
+  </ItemGroup>
+
 </Project>

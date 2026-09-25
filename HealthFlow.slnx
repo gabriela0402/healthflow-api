@@ -2,4 +2,7 @@
   <Project Path="HealthFlow.Api/HealthFlow.Api.csproj" />
   <Project Path="HealthFlow.Data/HealthFlow.Data.csproj" Id="22f08ecc-540b-433b-b892-faae877466b9" />
   <Project Path="HealthFlow.Model/HealthFlow.Model.csproj" />
+  <Project Path="HealthFlow.Repository/HealthFlow.Repository.csproj" Id="be840ce6-d012-4558-b0ae-65a16ae376ce" />
+  <Project Path="HealthFlow.Service/HealthFlow.Service.csproj" Id="31ea8d6f-9a97-4bf3-9ee0-92a369b19dc1" />
+  <Project Path="HealthFlow.Tests/HealthFlow.Tests.csproj" Id="5e6e5ce0-fd7a-4ec4-ab9e-14d50c6056f0" />
 </Solution>
