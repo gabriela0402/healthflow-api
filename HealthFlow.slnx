@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="HealthFlow.Api/HealthFlow.Api.csproj" />
+  <Project Path="HealthFlow.Model/HealthFlow.Model.csproj" />
+</Solution>
