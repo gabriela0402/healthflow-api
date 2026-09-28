@@ -1,0 +1,15 @@
+services:
+  healthflow.database:
+    container_name: healthflow.database
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - healthflow_sqlserver_data:/var/opt/mssql
+
+volumes:
+  healthflow_sqlserver_data:
