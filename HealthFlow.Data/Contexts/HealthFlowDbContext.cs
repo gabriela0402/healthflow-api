@@ -18,4 +18,12 @@ public class HealthFlowDbContext : DbContext
     public DbSet<Specialty> Specialties => Set<Specialty>();
 
     public DbSet<Appointment> Appointments => Set<Appointment>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(HealthFlowDbContext).Assembly);
+
+        base.OnModelCreating(modelBuilder);
+    }
 }
