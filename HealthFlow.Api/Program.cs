@@ -2,6 +2,11 @@ using HealthFlow.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using HealthFlow.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
+using HealthFlow.Repository.Interfaces;
+using HealthFlow.Repository.Repositories;
+using HealthFlow.Service.Interfaces;
+using HealthFlow.Service.Services;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +20,8 @@ var connectionString =
 builder.Services.AddDbContext<HealthFlowDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 
 // Add services to the container.

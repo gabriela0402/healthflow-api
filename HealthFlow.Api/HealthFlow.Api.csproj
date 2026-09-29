@@ -19,6 +19,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HealthFlow.Data\HealthFlow.Data.csproj" />
+    <ProjectReference Include="..\HealthFlow.Repository\HealthFlow.Repository.csproj" />
+    <ProjectReference Include="..\HealthFlow.Service\HealthFlow.Service.csproj" />
   </ItemGroup>
 
 </Project>
