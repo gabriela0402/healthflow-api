@@ -7,7 +7,10 @@ using HealthFlow.Repository.Repositories;
 using HealthFlow.Service.Interfaces;
 using HealthFlow.Service.Services;
 using HealthFlow.Api.Middlewares;
-
+using HealthFlow.Repository.Interfaces;
+using HealthFlow.Repository.Repositories;
+using HealthFlow.Service.Interfaces;
+using HealthFlow.Service.Services;
 
 
 
@@ -24,6 +27,9 @@ builder.Services.AddDbContext<HealthFlowDbContext>(options =>
 
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<ISpecialtyRepository,SpecialtyRepository>();
+builder.Services.AddScoped<ISpecialtyService,SpecialtyService>();
+
 
 
 // Add services to the container.

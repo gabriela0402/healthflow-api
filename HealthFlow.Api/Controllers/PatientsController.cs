@@ -16,9 +16,6 @@ public class PatientsController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(
-        typeof(IReadOnlyList<PatientResponse>),
-        StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<PatientResponse>>> GetAll(
         CancellationToken cancellationToken)
     {
@@ -29,13 +26,9 @@ public class PatientsController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    [ProducesResponseType(
-        typeof(PatientResponse),
-        StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PatientResponse>> GetById(
-    int id,
-    CancellationToken cancellationToken)
+        int id,
+        CancellationToken cancellationToken)
     {
         var patient = await _patientService.GetByIdAsync(
             id,
@@ -43,23 +36,16 @@ public class PatientsController : ControllerBase
 
         if (patient is null)
         {
-            return NotFound(new
-            {
-                message = "Paciente não encontrado."
-            });
+            return NotFound("Paciente não encontrado.");
         }
 
         return Ok(patient);
     }
 
     [HttpPost]
-    [ProducesResponseType(
-    typeof(PatientResponse),
-    StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PatientResponse>> Create(
-    [FromBody] CreatePatientRequest request,
-    CancellationToken cancellationToken)
+        CreatePatientRequest request,
+        CancellationToken cancellationToken)
     {
         var patient = await _patientService.CreateAsync(
             request,
@@ -70,5 +56,4 @@ public class PatientsController : ControllerBase
             new { id = patient.Id },
             patient);
     }
-
 }
