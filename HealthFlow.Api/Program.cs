@@ -6,6 +6,8 @@ using HealthFlow.Repository.Interfaces;
 using HealthFlow.Repository.Repositories;
 using HealthFlow.Service.Interfaces;
 using HealthFlow.Service.Services;
+using HealthFlow.Api.Middlewares;
+
 
 
 
@@ -32,6 +34,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

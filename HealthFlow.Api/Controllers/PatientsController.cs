@@ -1,5 +1,4 @@
 ﻿using HealthFlow.Model.DTOs.Patients;
-using HealthFlow.Service.Exceptions;
 using HealthFlow.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,30 +54,21 @@ public class PatientsController : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(
-        typeof(PatientResponse),
-        StatusCodes.Status201Created)]
+    typeof(PatientResponse),
+    StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PatientResponse>> Create(
-        [FromBody] CreatePatientRequest request,
-        CancellationToken cancellationToken)
+    [FromBody] CreatePatientRequest request,
+    CancellationToken cancellationToken)
     {
-        try
-        {
-            var patient = await _patientService.CreateAsync(
-                request,
-                cancellationToken);
+        var patient = await _patientService.CreateAsync(
+            request,
+            cancellationToken);
 
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = patient.Id },
-                patient);
-        }
-        catch (BusinessRuleException exception)
-        {
-            return BadRequest(new
-            {
-                message = exception.Message
-            });
-        }
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = patient.Id },
+            patient);
     }
+
 }
