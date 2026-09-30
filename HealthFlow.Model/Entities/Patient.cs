@@ -2,7 +2,7 @@
 
 public class Patient
 {
-    public Guid Id { get; private set; }
+    public int Id { get; private set; }
 
     public string FullName { get; private set; } = string.Empty;
 
@@ -27,7 +27,6 @@ public class Patient
         string phone,
         DateTime dateOfBirth)
     {
-        Id = Guid.NewGuid();
         FullName = fullName;
         Email = email;
         Phone = phone;

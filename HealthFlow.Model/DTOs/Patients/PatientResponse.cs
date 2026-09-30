@@ -3,7 +3,7 @@
 namespace HealthFlow.Model.DTOs.Patients;
 
 public sealed record PatientResponse(
-    Guid Id,
+    int Id,
     string FullName,
     string Email,
     string Phone,

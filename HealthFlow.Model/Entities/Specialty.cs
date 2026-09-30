@@ -2,7 +2,7 @@
 
 public class Specialty
 {
-    public Guid Id { get; private set; }
+    public int Id { get; private set; }
 
     public string Name { get; private set; } = string.Empty;
 
@@ -15,7 +15,6 @@ public class Specialty
 
     public Specialty(string name)
     {
-        Id = Guid.NewGuid();
         Name = name;
     }
 }

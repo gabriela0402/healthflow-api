@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HealthFlow.Data\HealthFlow.Data.csproj" />
+    <ProjectReference Include="..\HealthFlow.Model\HealthFlow.Model.csproj" />
     <ProjectReference Include="..\HealthFlow.Repository\HealthFlow.Repository.csproj" />
     <ProjectReference Include="..\HealthFlow.Service\HealthFlow.Service.csproj" />
   </ItemGroup>

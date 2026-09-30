@@ -4,13 +4,13 @@ namespace HealthFlow.Model.Entities;
 
 public class Appointment
 {
-    public Guid Id { get; private set; }
+    public int Id { get; private set; }
 
-    public Guid PatientId { get; private set; }
+    public int PatientId { get; private set; }
 
     public Patient Patient { get; private set; } = null!;
 
-    public Guid ProfessionalId { get; private set; }
+    public int ProfessionalId { get; private set; }
 
     public Professional Professional { get; private set; } = null!;
 
@@ -27,12 +27,11 @@ public class Appointment
     }
 
     public Appointment(
-        Guid patientId,
-        Guid professionalId,
+        int patientId,
+        int professionalId,
         DateTime scheduledAt,
         string? notes = null)
     {
-        Id = Guid.NewGuid();
         PatientId = patientId;
         ProfessionalId = professionalId;
         ScheduledAt = scheduledAt;

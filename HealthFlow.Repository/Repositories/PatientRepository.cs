@@ -15,8 +15,8 @@ public class PatientRepository : IPatientRepository
     }
 
     public async Task<Patient?> GetByIdAsync(
-        Guid id,
-        CancellationToken cancellationToken = default)
+    int id,
+    CancellationToken cancellationToken = default)
     {
         return await _context.Patients
             .FirstOrDefaultAsync(

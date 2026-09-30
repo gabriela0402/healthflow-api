@@ -52,14 +52,15 @@ public sealed class PatientService : IPatientService
     }
 
     public async Task<PatientResponse?> GetByIdAsync(
-        Guid id,
+        int id,
         CancellationToken cancellationToken = default)
     {
-        if (id == Guid.Empty)
+        if (id <= 0)
         {
-            throw new BusinessRuleException(
-                "O identificador do paciente é inválido.");
+           throw new BusinessRuleException(
+             "O identificador do paciente é inválido.");
         }
+
 
         var patient = await _patientRepository.GetByIdAsync(
             id,

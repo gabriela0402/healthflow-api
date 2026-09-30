@@ -9,7 +9,7 @@ public interface IPatientService
         CancellationToken cancellationToken = default);
 
     Task<PatientResponse?> GetByIdAsync(
-        Guid id,
+        int id,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<PatientResponse>> GetAllAsync(

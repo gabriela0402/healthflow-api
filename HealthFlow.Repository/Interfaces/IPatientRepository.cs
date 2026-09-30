@@ -5,7 +5,7 @@ namespace HealthFlow.Repository.Interfaces;
 public interface IPatientRepository
 {
     Task<Patient?> GetByIdAsync(
-        Guid id,
+        int id,
         CancellationToken cancellationToken = default);
 
     Task<Patient?> GetByEmailAsync(
