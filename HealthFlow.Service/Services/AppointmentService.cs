@@ -128,4 +128,76 @@ public class AppointmentService : IAppointmentService
             .Select(AppointmentResponse.FromEntity)
             .ToList();
     }
+
+    public async Task<AppointmentResponse> ConfirmAsync(
+    int id,
+    CancellationToken cancellationToken = default)
+    {
+        var appointment = await GetAppointmentOrThrowAsync(
+            id,
+            cancellationToken);
+
+        appointment.Confirm();
+
+        await _appointmentRepository.SaveChangesAsync(
+            cancellationToken);
+
+        return AppointmentResponse.FromEntity(appointment);
+    }
+
+    public async Task<AppointmentResponse> CancelAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var appointment = await GetAppointmentOrThrowAsync(
+            id,
+            cancellationToken);
+
+        appointment.Cancel();
+
+        await _appointmentRepository.SaveChangesAsync(
+            cancellationToken);
+
+        return AppointmentResponse.FromEntity(appointment);
+    }
+
+    public async Task<AppointmentResponse> CompleteAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        var appointment = await GetAppointmentOrThrowAsync(
+            id,
+            cancellationToken);
+
+        appointment.Complete();
+
+        await _appointmentRepository.SaveChangesAsync(
+            cancellationToken);
+
+        return AppointmentResponse.FromEntity(appointment);
+    }
+
+    private async Task<Appointment> GetAppointmentOrThrowAsync(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        if (id <= 0)
+        {
+            throw new BusinessRuleException(
+                "O identificador do agendamento é inválido.");
+        }
+
+        var appointment = await _appointmentRepository.GetByIdAsync(
+            id,
+            cancellationToken);
+
+        if (appointment is null)
+        {
+            throw new BusinessRuleException(
+                "Agendamento não encontrado.");
+        }
+
+        return appointment;
+    }
+
 }

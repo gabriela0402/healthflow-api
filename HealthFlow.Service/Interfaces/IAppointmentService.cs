@@ -14,4 +14,16 @@ public interface IAppointmentService
 
     Task<IReadOnlyList<AppointmentResponse>> GetAllAsync(
         CancellationToken cancellationToken = default);
+
+    Task<AppointmentResponse> ConfirmAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    Task<AppointmentResponse> CancelAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    Task<AppointmentResponse> CompleteAsync(
+        int id,
+        CancellationToken cancellationToken = default);
 }

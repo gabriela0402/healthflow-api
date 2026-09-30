@@ -57,4 +57,41 @@ public class AppointmentsController : ControllerBase
             new { id = appointment.Id },
             appointment);
     }
+
+    [HttpPut("{id:int}/confirm")]
+    public async Task<ActionResult<AppointmentResponse>> Confirm(
+    int id,
+    CancellationToken cancellationToken)
+    {
+        var appointment = await _appointmentService.ConfirmAsync(
+            id,
+            cancellationToken);
+
+        return Ok(appointment);
+    }
+
+    [HttpPut("{id:int}/cancel")]
+    public async Task<ActionResult<AppointmentResponse>> Cancel(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var appointment = await _appointmentService.CancelAsync(
+            id,
+            cancellationToken);
+
+        return Ok(appointment);
+    }
+
+    [HttpPut("{id:int}/complete")]
+    public async Task<ActionResult<AppointmentResponse>> Complete(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var appointment = await _appointmentService.CompleteAsync(
+            id,
+            cancellationToken);
+
+        return Ok(appointment);
+    }
+
 }
