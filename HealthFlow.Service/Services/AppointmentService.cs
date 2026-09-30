@@ -3,7 +3,7 @@ using HealthFlow.Model.Entities;
 using HealthFlow.Repository.Interfaces;
 using HealthFlow.Service.Exceptions;
 using HealthFlow.Service.Interfaces;
-
+using HealthFlow.Model.Enums;
 namespace HealthFlow.Service.Services;
 
 public class AppointmentService : IAppointmentService
@@ -162,12 +162,18 @@ public class AppointmentService : IAppointmentService
     }
 
     public async Task<AppointmentResponse> CompleteAsync(
-        int id,
-        CancellationToken cancellationToken = default)
+    int id,
+    CancellationToken cancellationToken = default)
     {
         var appointment = await GetAppointmentOrThrowAsync(
             id,
             cancellationToken);
+
+        if (appointment.Status == AppointmentStatus.Cancelled)
+        {
+            throw new BusinessRuleException(
+                "Um agendamento cancelado não pode ser concluído.");
+        }
 
         appointment.Complete();
 
@@ -176,6 +182,7 @@ public class AppointmentService : IAppointmentService
 
         return AppointmentResponse.FromEntity(appointment);
     }
+
 
     private async Task<Appointment> GetAppointmentOrThrowAsync(
         int id,
