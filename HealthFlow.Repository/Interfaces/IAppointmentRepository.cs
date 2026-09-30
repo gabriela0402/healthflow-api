@@ -11,6 +11,11 @@ public interface IAppointmentRepository
         int id,
         CancellationToken cancellationToken = default);
 
+    Task<bool> ExistsAtDateAsync(
+        int professionalId,
+        DateTime scheduledAt,
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(
         Appointment appointment,
         CancellationToken cancellationToken = default);

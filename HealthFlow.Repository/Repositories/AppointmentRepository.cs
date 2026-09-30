@@ -2,6 +2,8 @@
 using HealthFlow.Model.Entities;
 using HealthFlow.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using HealthFlow.Model.Enums;
+
 
 namespace HealthFlow.Repository.Repositories;
 
@@ -51,4 +53,18 @@ public class AppointmentRepository : IAppointmentRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+    public async Task<bool> ExistsAtDateAsync(
+        int professionalId,
+        DateTime scheduledAt,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Appointments
+            .AnyAsync(
+                appointment =>
+                    appointment.ProfessionalId == professionalId &&
+                    appointment.ScheduledAt == scheduledAt &&
+                    appointment.Status != AppointmentStatus.Cancelled,
+                cancellationToken);
+    }
+
 }

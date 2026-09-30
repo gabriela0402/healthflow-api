@@ -31,6 +31,9 @@ builder.Services.AddScoped<ISpecialtyRepository,SpecialtyRepository>();
 builder.Services.AddScoped<ISpecialtyService,SpecialtyService>();
 builder.Services.AddScoped< IProfessionalRepository,ProfessionalRepository>();
 builder.Services.AddScoped< IProfessionalService, ProfessionalService>();
+builder.Services.AddScoped<IAppointmentRepository,AppointmentRepository>();
+builder.Services.AddScoped< IAppointmentService,AppointmentService>();
+
 
 
 // Add services to the container.
