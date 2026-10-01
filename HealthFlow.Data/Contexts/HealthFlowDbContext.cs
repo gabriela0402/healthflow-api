@@ -18,11 +18,18 @@ public class HealthFlowDbContext : DbContext
     public DbSet<Specialty> Specialties => Set<Specialty>();
 
     public DbSet<Appointment> Appointments => Set<Appointment>();
+    public DbSet<User> Users { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(HealthFlowDbContext).Assembly);
+        modelBuilder.Entity<User>()
+        .HasIndex(user => user.Email)
+        .IsUnique();
+
+        modelBuilder.Entity<Appointment>()
+        .Property(appointment => appointment.Status)
+        .HasConversion<string>();
 
         base.OnModelCreating(modelBuilder);
     }
