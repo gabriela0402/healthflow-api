@@ -1,11 +1,12 @@
 ﻿using HealthFlow.Model.DTOs.Patients;
 using HealthFlow.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 namespace HealthFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class PatientsController : ControllerBase
 {
     private readonly IPatientService _patientService;

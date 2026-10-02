@@ -1,12 +1,13 @@
 ﻿using HealthFlow.Model.DTOs.Professionals;
 using HealthFlow.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Authorization;
 
 namespace HealthFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ProfessionalsController : ControllerBase
 {
     private readonly IProfessionalService _professionalService;

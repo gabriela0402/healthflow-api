@@ -1,13 +1,15 @@
+using HealthFlow.Api.Middlewares;
 using HealthFlow.Data.Contexts;
-using Microsoft.EntityFrameworkCore;
 using HealthFlow.Repository.Interfaces;
 using HealthFlow.Repository.Repositories;
 using HealthFlow.Service.Interfaces;
 using HealthFlow.Service.Services;
-using HealthFlow.Api.Middlewares;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Text;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,7 +39,36 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description =
+                "JWT Authorization header usando o esquema Bearer."
+        });
+
+    options.AddSecurityRequirement(
+        document => new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference(
+                "Bearer",
+                document)] = []
+        });
+});
+
+
+
+
+
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException(

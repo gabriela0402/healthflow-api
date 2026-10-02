@@ -1,11 +1,13 @@
 ﻿using HealthFlow.Model.DTOs.Specialties;
 using HealthFlow.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HealthFlow.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class SpecialtiesController : ControllerBase
 {
     private readonly ISpecialtyService _specialtyService;
