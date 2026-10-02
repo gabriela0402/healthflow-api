@@ -49,7 +49,7 @@ HealthFlow.Tests        Testes unitários
 Clone o repositório e acesse a pasta do projeto:
 
 ```powershell
-git clone URL_DO_REPOSITORIO
+git clone https://github.com/gabriela0402/healthflow-api.git
 cd HealthFlow
 ```
 
