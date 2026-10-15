@@ -14,6 +14,18 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+
 
 var connectionString =
     builder.Configuration.GetConnectionString("HealthFlowConnection")
@@ -67,9 +79,6 @@ builder.Services.AddSwaggerGen(options =>
 
 
 
-
-
-
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException(
         "A chave JWT não foi configurada.");
@@ -95,6 +104,9 @@ builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
+
+app.UseCors("FrontendPolicy");
+
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
