@@ -118,8 +118,10 @@ public class AuthService : IAuthService
             user.Id,
             user.Name,
             user.Email,
+            user.Role,
             token);
-    }
+
+            }
 
     private string GenerateToken(User user)
     {
@@ -143,8 +145,13 @@ public class AuthService : IAuthService
 
             new Claim(
                 ClaimTypes.Email,
-                user.Email)
+                user.Email),
+
+            new Claim(
+                ClaimTypes.Role,
+                user.Role)
         };
+
 
         var securityKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(key));

@@ -10,6 +10,8 @@ public class User
 
     public string PasswordHash { get; private set; } = string.Empty;
 
+    public string Role { get; private set; } = "Patient";
+
     public DateTime CreatedAt { get; private set; }
 
     protected User()
@@ -19,11 +21,13 @@ public class User
     public User(
         string name,
         string email,
-        string passwordHash)
+        string passwordHash,
+        string role = "Patient")
     {
         Name = name;
         Email = email;
         PasswordHash = passwordHash;
+        Role = role;
         CreatedAt = DateTime.UtcNow;
     }
 
@@ -32,4 +36,9 @@ public class User
         PasswordHash = passwordHash;
     }
 
+    public void SetRole(string role)
+    {
+        Role = role;
+    }
 }
+
