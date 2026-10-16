@@ -15,14 +15,17 @@ namespace HealthFlow.Service.Services;
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IPatientRepository _patientRepository;
     private readonly PasswordHasher<User> _passwordHasher;
     private readonly IConfiguration _configuration;
 
     public AuthService(
         IUserRepository userRepository,
+        IPatientRepository patientRepository,
         IConfiguration configuration)
     {
         _userRepository = userRepository;
+        _patientRepository = patientRepository;
         _configuration = configuration;
         _passwordHasher = new PasswordHasher<User>();
     }
@@ -50,11 +53,13 @@ public class AuthService : IAuthService
                 "A senha deve possuir pelo menos 6 caracteres.");
         }
 
+        var name = request.Name.Trim();
         var email = request.Email.Trim().ToLowerInvariant();
 
-        var existingUser = await _userRepository.GetByEmailAsync(
-            email,
-            cancellationToken);
+        var existingUser =
+            await _userRepository.GetByEmailAsync(
+                email,
+                cancellationToken);
 
         if (existingUser is not null)
         {
@@ -62,13 +67,27 @@ public class AuthService : IAuthService
                 "Já existe um usuário com este e-mail.");
         }
 
+        var existingPatient =
+            await _patientRepository.GetByEmailAsync(
+                email,
+                cancellationToken);
+
+        if (existingPatient is not null)
+        {
+            throw new BusinessRuleException(
+                "Já existe um paciente com este e-mail.");
+        }
+
         var user = new User(
-            request.Name.Trim(),
+            name,
             email,
-            string.Empty);
+            string.Empty,
+            "Patient");
 
         user.SetPasswordHash(
-            _passwordHasher.HashPassword(user, request.Password));
+            _passwordHasher.HashPassword(
+                user,
+                request.Password));
 
         await _userRepository.AddAsync(
             user,
@@ -77,7 +96,18 @@ public class AuthService : IAuthService
         await _userRepository.SaveChangesAsync(
             cancellationToken);
 
-        return CreateAuthResponse(user);
+        var patient = new Patient(
+            name,
+            email);
+
+        await _patientRepository.AddAsync(
+            patient,
+            cancellationToken);
+
+        await _patientRepository.SaveChangesAsync(
+            cancellationToken);
+
+        return CreateAuthResponse(user, patient);
     }
 
     public async Task<AuthResponse> LoginAsync(
@@ -86,9 +116,10 @@ public class AuthService : IAuthService
     {
         var email = request.Email.Trim().ToLowerInvariant();
 
-        var user = await _userRepository.GetByEmailAsync(
-            email,
-            cancellationToken);
+        var user =
+            await _userRepository.GetByEmailAsync(
+                email,
+                cancellationToken);
 
         if (user is null)
         {
@@ -96,32 +127,41 @@ public class AuthService : IAuthService
                 "E-mail ou senha inválidos.");
         }
 
-        var passwordResult = _passwordHasher.VerifyHashedPassword(
-            user,
-            user.PasswordHash,
-            request.Password);
+        var passwordResult =
+            _passwordHasher.VerifyHashedPassword(
+                user,
+                user.PasswordHash,
+                request.Password);
 
-        if (passwordResult == PasswordVerificationResult.Failed)
+        if (passwordResult ==
+            PasswordVerificationResult.Failed)
         {
             throw new BusinessRuleException(
                 "E-mail ou senha inválidos.");
         }
 
-        return CreateAuthResponse(user);
+        var patient =
+            await _patientRepository.GetByEmailAsync(
+                user.Email,
+                cancellationToken);
+
+        return CreateAuthResponse(user, patient);
     }
 
-    private AuthResponse CreateAuthResponse(User user)
+    private AuthResponse CreateAuthResponse(
+        User user,
+        Patient? patient)
     {
         var token = GenerateToken(user);
 
         return new AuthResponse(
             user.Id,
+            patient?.Id,
             user.Name,
             user.Email,
             user.Role,
             token);
-
-            }
+    }
 
     private string GenerateToken(User user)
     {
@@ -152,13 +192,14 @@ public class AuthService : IAuthService
                 user.Role)
         };
 
+        var securityKey =
+            new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(key));
 
-        var securityKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(key));
-
-        var credentials = new SigningCredentials(
-            securityKey,
-            SecurityAlgorithms.HmacSha256);
+        var credentials =
+            new SigningCredentials(
+                securityKey,
+                SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             claims: claims,

@@ -10,25 +10,35 @@ namespace HealthFlow.Tests.Services;
 
 public class AuthServiceTests
 {
-    private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<IUserRepository>
+        _userRepositoryMock;
+
+    private readonly Mock<IPatientRepository>
+        _patientRepositoryMock;
+
     private readonly AuthService _service;
 
     public AuthServiceTests()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
 
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(
-                new Dictionary<string, string?>
-                {
-                    ["Jwt:Key"] =
-                        "HealthFlow-Test-Key-2026-"
-                        + "Long-Secret-For-Tests"
-                })
-            .Build();
+        _patientRepositoryMock =
+            new Mock<IPatientRepository>();
+
+        var configuration =
+            new ConfigurationBuilder()
+                .AddInMemoryCollection(
+                    new Dictionary<string, string?>
+                    {
+                        ["Jwt:Key"] =
+                            "HealthFlow-Test-Key-2026-"
+                            + "Long-Secret-For-Tests"
+                    })
+                .Build();
 
         _service = new AuthService(
             _userRepositoryMock.Object,
+            _patientRepositoryMock.Object,
             configuration);
     }
 
@@ -36,32 +46,86 @@ public class AuthServiceTests
     public async Task Deve_cadastrar_usuario()
     {
         _userRepositoryMock
-            .Setup(repository => repository.GetByEmailAsync(
-                "gabriela@email.com",
-                It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetByEmailAsync(
+                    "gabriela@email.com",
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
+
+        _patientRepositoryMock
+            .Setup(repository =>
+                repository.GetByEmailAsync(
+                    "gabriela@email.com",
+                    It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Patient?)null);
+
+        _userRepositoryMock
+            .Setup(repository =>
+                repository.AddAsync(
+                    It.IsAny<User>(),
+                    It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _userRepositoryMock
+            .Setup(repository =>
+                repository.SaveChangesAsync(
+                    It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _patientRepositoryMock
+            .Setup(repository =>
+                repository.AddAsync(
+                    It.IsAny<Patient>(),
+                    It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _patientRepositoryMock
+            .Setup(repository =>
+                repository.SaveChangesAsync(
+                    It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         var request = new RegisterRequest(
             "Gabriela",
             "gabriela@email.com",
             "123456");
 
-        var result = await _service.RegisterAsync(request);
+        var result =
+            await _service.RegisterAsync(request);
 
         Assert.NotNull(result);
         Assert.Equal("Gabriela", result.Name);
-        Assert.Equal("gabriela@email.com", result.Email);
-        Assert.False(string.IsNullOrWhiteSpace(result.Token));
+        Assert.Equal(
+            "gabriela@email.com",
+            result.Email);
+        Assert.Equal("Patient", result.Role);
+        Assert.False(
+            string.IsNullOrWhiteSpace(result.Token));
 
         _userRepositoryMock.Verify(
-            repository => repository.AddAsync(
-                It.IsAny<User>(),
-                It.IsAny<CancellationToken>()),
+            repository =>
+                repository.AddAsync(
+                    It.IsAny<User>(),
+                    It.IsAny<CancellationToken>()),
             Times.Once);
 
         _userRepositoryMock.Verify(
-            repository => repository.SaveChangesAsync(
-                It.IsAny<CancellationToken>()),
+            repository =>
+                repository.SaveChangesAsync(
+                    It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        _patientRepositoryMock.Verify(
+            repository =>
+                repository.AddAsync(
+                    It.IsAny<Patient>(),
+                    It.IsAny<CancellationToken>()),
+            Times.Once);
+
+        _patientRepositoryMock.Verify(
+            repository =>
+                repository.SaveChangesAsync(
+                    It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -74,9 +138,10 @@ public class AuthServiceTests
             "hash");
 
         _userRepositoryMock
-            .Setup(repository => repository.GetByEmailAsync(
-                "gabriela@email.com",
-                It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetByEmailAsync(
+                    "gabriela@email.com",
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingUser);
 
         var request = new RegisterRequest(
@@ -84,18 +149,26 @@ public class AuthServiceTests
             "gabriela@email.com",
             "123456");
 
-        var exception = await Assert.ThrowsAsync<
-            BusinessRuleException>(
-            () => _service.RegisterAsync(request));
+        var exception =
+            await Assert.ThrowsAsync<BusinessRuleException>(
+                () => _service.RegisterAsync(request));
 
         Assert.Equal(
             "Já existe um usuário com este e-mail.",
             exception.Message);
 
         _userRepositoryMock.Verify(
-            repository => repository.AddAsync(
-                It.IsAny<User>(),
-                It.IsAny<CancellationToken>()),
+            repository =>
+                repository.AddAsync(
+                    It.IsAny<User>(),
+                    It.IsAny<CancellationToken>()),
+            Times.Never);
+
+        _patientRepositoryMock.Verify(
+            repository =>
+                repository.AddAsync(
+                    It.IsAny<Patient>(),
+                    It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -108,26 +181,43 @@ public class AuthServiceTests
             string.Empty);
 
         var passwordHasher =
-            new Microsoft.AspNetCore.Identity.PasswordHasher<User>();
+            new Microsoft.AspNetCore.Identity
+                .PasswordHasher<User>();
 
         user.SetPasswordHash(
-            passwordHasher.HashPassword(user, "123456"));
+            passwordHasher.HashPassword(
+                user,
+                "123456"));
 
         _userRepositoryMock
-            .Setup(repository => repository.GetByEmailAsync(
-                "gabriela@email.com",
-                It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetByEmailAsync(
+                    "gabriela@email.com",
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
+
+        _patientRepositoryMock
+            .Setup(repository =>
+                repository.GetByEmailAsync(
+                    "gabriela@email.com",
+                    It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Patient?)null);
 
         var request = new LoginRequest(
             "gabriela@email.com",
             "123456");
 
-        var result = await _service.LoginAsync(request);
+        var result =
+            await _service.LoginAsync(request);
 
         Assert.NotNull(result);
-        Assert.Equal("gabriela@email.com", result.Email);
-        Assert.False(string.IsNullOrWhiteSpace(result.Token));
+        Assert.Equal(
+            "gabriela@email.com",
+            result.Email);
+        Assert.Equal("Patient", result.Role);
+        Assert.Null(result.PatientId);
+        Assert.False(
+            string.IsNullOrWhiteSpace(result.Token));
     }
 
     [Fact]
@@ -139,24 +229,28 @@ public class AuthServiceTests
             string.Empty);
 
         var passwordHasher =
-            new Microsoft.AspNetCore.Identity.PasswordHasher<User>();
+            new Microsoft.AspNetCore.Identity
+                .PasswordHasher<User>();
 
         user.SetPasswordHash(
-            passwordHasher.HashPassword(user, "123456"));
+            passwordHasher.HashPassword(
+                user,
+                "123456"));
 
         _userRepositoryMock
-            .Setup(repository => repository.GetByEmailAsync(
-                "gabriela@email.com",
-                It.IsAny<CancellationToken>()))
+            .Setup(repository =>
+                repository.GetByEmailAsync(
+                    "gabriela@email.com",
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
         var request = new LoginRequest(
             "gabriela@email.com",
             "senha-incorreta");
 
-        var exception = await Assert.ThrowsAsync<
-            BusinessRuleException>(
-            () => _service.LoginAsync(request));
+        var exception =
+            await Assert.ThrowsAsync<BusinessRuleException>(
+                () => _service.LoginAsync(request));
 
         Assert.Equal(
             "E-mail ou senha inválidos.",
