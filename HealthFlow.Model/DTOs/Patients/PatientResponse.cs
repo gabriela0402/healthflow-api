@@ -7,7 +7,7 @@ public sealed record PatientResponse(
     string FullName,
     string Email,
     string Phone,
-    DateTime DateOfBirth,
+    DateTime? DateOfBirth,
     DateTime CreatedAt)
 {
     public static PatientResponse FromEntity(Patient patient)
