@@ -11,25 +11,48 @@ public class HealthFlowDbContext : DbContext
     {
     }
 
-    public DbSet<Patient> Patients => Set<Patient>();
+    public DbSet<Patient> Patients =>
+        Set<Patient>();
 
-    public DbSet<Professional> Professionals => Set<Professional>();
+    public DbSet<Professional> Professionals =>
+        Set<Professional>();
 
-    public DbSet<Specialty> Specialties => Set<Specialty>();
+    public DbSet<Specialty> Specialties =>
+        Set<Specialty>();
 
-    public DbSet<Appointment> Appointments => Set<Appointment>();
-    public DbSet<User> Users { get; set; }
+    public DbSet<Appointment> Appointments =>
+        Set<Appointment>();
 
+    public DbSet<ProfessionalAvailability>
+        ProfessionalAvailabilities =>
+        Set<ProfessionalAvailability>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public DbSet<User> Users =>
+        Set<User>();
+
+    protected override void OnModelCreating(
+        ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
-        .HasIndex(user => user.Email)
-        .IsUnique();
+            .HasIndex(user => user.Email)
+            .IsUnique();
 
         modelBuilder.Entity<Appointment>()
-        .Property(appointment => appointment.Status)
-        .HasConversion<string>();
+            .Property(appointment => appointment.Status)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<ProfessionalAvailability>()
+            .HasOne(availability => availability.Professional)
+            .WithMany(professional =>
+                professional.Availabilities)
+            .HasForeignKey(availability =>
+                availability.ProfessionalId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProfessionalAvailability>()
+            .Property(availability =>
+                availability.DayOfWeek)
+            .HasConversion<string>();
 
         base.OnModelCreating(modelBuilder);
     }

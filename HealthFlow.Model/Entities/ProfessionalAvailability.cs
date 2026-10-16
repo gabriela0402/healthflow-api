@@ -1,4 +1,4 @@
-﻿using HealthFlow.Model.Entities;
+﻿namespace HealthFlow.Model.Entities;
 
 public class ProfessionalAvailability
 {
@@ -6,13 +6,31 @@ public class ProfessionalAvailability
 
     public int ProfessionalId { get; private set; }
 
+    public Professional Professional { get; private set; } = null!;
+
     public DayOfWeek DayOfWeek { get; private set; }
 
-    public TimeOnly StartTime { get; private set; }
+    public TimeSpan StartTime { get; private set; }
 
-    public TimeOnly EndTime { get; private set; }
+    public TimeSpan EndTime { get; private set; }
 
     public int SlotDurationInMinutes { get; private set; }
 
-    public Professional Professional { get; private set; } = null!;
+    protected ProfessionalAvailability()
+    {
+    }
+
+    public ProfessionalAvailability(
+        int professionalId,
+        DayOfWeek dayOfWeek,
+        TimeSpan startTime,
+        TimeSpan endTime,
+        int slotDurationInMinutes = 30)
+    {
+        ProfessionalId = professionalId;
+        DayOfWeek = dayOfWeek;
+        StartTime = startTime;
+        EndTime = endTime;
+        SlotDurationInMinutes = slotDurationInMinutes;
+    }
 }

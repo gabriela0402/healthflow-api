@@ -167,6 +167,37 @@ namespace HealthFlow.Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("ProfessionalAvailability", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DayOfWeek")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("ProfessionalId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SlotDurationInMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionalId");
+
+                    b.ToTable("ProfessionalAvailabilities");
+                });
+
             modelBuilder.Entity("HealthFlow.Model.Entities.Appointment", b =>
                 {
                     b.HasOne("HealthFlow.Model.Entities.Patient", "Patient")
@@ -197,6 +228,17 @@ namespace HealthFlow.Data.Migrations
                     b.Navigation("Specialty");
                 });
 
+            modelBuilder.Entity("ProfessionalAvailability", b =>
+                {
+                    b.HasOne("HealthFlow.Model.Entities.Professional", "Professional")
+                        .WithMany("Availabilities")
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Professional");
+                });
+
             modelBuilder.Entity("HealthFlow.Model.Entities.Patient", b =>
                 {
                     b.Navigation("Appointments");
@@ -205,6 +247,8 @@ namespace HealthFlow.Data.Migrations
             modelBuilder.Entity("HealthFlow.Model.Entities.Professional", b =>
                 {
                     b.Navigation("Appointments");
+
+                    b.Navigation("Availabilities");
                 });
 
             modelBuilder.Entity("HealthFlow.Model.Entities.Specialty", b =>
