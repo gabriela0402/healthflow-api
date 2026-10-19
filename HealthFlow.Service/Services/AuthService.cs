@@ -98,7 +98,10 @@ public class AuthService : IAuthService
 
         var patient = new Patient(
             name,
-            email);
+            email,
+            string.Empty,
+            new DateTime(1900, 1, 1));
+
 
         await _patientRepository.AddAsync(
             patient,

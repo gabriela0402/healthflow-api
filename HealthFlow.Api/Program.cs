@@ -26,14 +26,20 @@ builder.Services.AddCors(options =>
 });
 
 
-
 var connectionString =
-    builder.Configuration.GetConnectionString("HealthFlowConnection")
-    ?? throw new InvalidOperationException(
-        "A connection string 'HealthFlowConnection' não foi encontrada.");
+    builder.Configuration.GetConnectionString(
+        "HealthFlowConnection");
 
-builder.Services.AddDbContext<HealthFlowDbContext>(options =>
-    options.UseSqlServer(connectionString));
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "A connection string 'HealthFlowConnection' não foi configurada.");
+}
+
+builder.Services.AddDbContext<HealthFlowDbContext>(
+    options =>
+        options.UseSqlServer(connectionString));
+
 
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientService, PatientService>();
@@ -108,6 +114,8 @@ builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
+
+
 
 app.UseCors("FrontendPolicy");
 
