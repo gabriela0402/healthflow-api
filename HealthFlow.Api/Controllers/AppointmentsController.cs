@@ -1,8 +1,9 @@
 ﻿using HealthFlow.Model.DTOs.Appointments;
 using HealthFlow.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthFlow.Api.Controllers;
 
@@ -95,6 +96,25 @@ public class AppointmentsController : ControllerBase
             cancellationToken);
 
         return Ok(appointment);
+    }
+
+    [HttpGet("me")]
+    public async Task<ActionResult<IReadOnlyList<AppointmentListItemResponse>>> GetMine(
+    CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email)
+            ?? User.FindFirstValue("email");
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Unauthorized();
+        }
+
+        var appointments = await _appointmentService.GetMyAppointmentsAsync(
+            email,
+            cancellationToken);
+
+        return Ok(appointments);
     }
 
 }

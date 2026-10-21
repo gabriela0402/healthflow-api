@@ -206,5 +206,27 @@ public class AppointmentService : IAppointmentService
 
         return appointment;
     }
+    public async Task<IReadOnlyList<AppointmentListItemResponse>> GetMyAppointmentsAsync(
+    string email,
+    CancellationToken cancellationToken = default)
+    {
+        var patient = await _patientRepository.GetByEmailAsync(
+            email.Trim().ToLowerInvariant(),
+            cancellationToken);
+
+        if (patient is null)
+        {
+            throw new BusinessRuleException(
+                "Paciente não encontrado para o usuário logado.");
+        }
+
+        var appointments = await _appointmentRepository.GetByPatientIdAsync(
+            patient.Id,
+            cancellationToken);
+
+        return appointments
+            .Select(AppointmentListItemResponse.FromEntity)
+            .ToList();
+    }
 
 }
