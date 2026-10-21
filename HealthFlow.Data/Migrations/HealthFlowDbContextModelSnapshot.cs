@@ -66,22 +66,36 @@ namespace HealthFlow.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Cpf")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateOfBirth")
+                    b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EmergencyContactName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmergencyContactPhone")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Gender")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -113,6 +127,37 @@ namespace HealthFlow.Data.Migrations
                     b.HasIndex("SpecialtyId");
 
                     b.ToTable("Professionals");
+                });
+
+            modelBuilder.Entity("HealthFlow.Model.Entities.ProfessionalAvailability", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DayOfWeek")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("ProfessionalId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SlotDurationInMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionalId");
+
+                    b.ToTable("ProfessionalAvailabilities");
                 });
 
             modelBuilder.Entity("HealthFlow.Model.Entities.Specialty", b =>
@@ -167,37 +212,6 @@ namespace HealthFlow.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ProfessionalAvailability", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DayOfWeek")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<int>("ProfessionalId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SlotDurationInMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfessionalId");
-
-                    b.ToTable("ProfessionalAvailabilities");
-                });
-
             modelBuilder.Entity("HealthFlow.Model.Entities.Appointment", b =>
                 {
                     b.HasOne("HealthFlow.Model.Entities.Patient", "Patient")
@@ -228,7 +242,7 @@ namespace HealthFlow.Data.Migrations
                     b.Navigation("Specialty");
                 });
 
-            modelBuilder.Entity("ProfessionalAvailability", b =>
+            modelBuilder.Entity("HealthFlow.Model.Entities.ProfessionalAvailability", b =>
                 {
                     b.HasOne("HealthFlow.Model.Entities.Professional", "Professional")
                         .WithMany("Availabilities")

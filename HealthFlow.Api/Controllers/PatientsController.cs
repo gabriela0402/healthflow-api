@@ -1,7 +1,8 @@
 ﻿using HealthFlow.Model.DTOs.Patients;
 using HealthFlow.Service.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 namespace HealthFlow.Api.Controllers;
 
 [ApiController]
@@ -56,5 +57,37 @@ public class PatientsController : ControllerBase
             nameof(GetById),
             new { id = patient.Id },
             patient);
+    }
+
+    [HttpGet("me")]
+    public async Task<ActionResult<PatientProfileResponse>> GetMine(
+    CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Unauthorized();
+        }
+
+        return Ok(await _patientService.GetMyProfileAsync(email, cancellationToken));
+    }
+
+    [HttpPut("me")]
+    public async Task<ActionResult<PatientProfileResponse>> UpdateMine(
+        UpdatePatientProfileRequest request,
+        CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Unauthorized();
+        }
+
+        return Ok(await _patientService.UpdateMyProfileAsync(
+            email,
+            request,
+            cancellationToken));
     }
 }

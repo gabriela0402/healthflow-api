@@ -40,5 +40,9 @@ public class User
     {
         Role = role;
     }
+    public void SetName(string name)
+    {
+        Name = name;
+    }
 }
 

@@ -14,4 +14,12 @@ public interface IPatientService
 
     Task<IReadOnlyList<PatientResponse>> GetAllAsync(
         CancellationToken cancellationToken = default);
+    Task<PatientProfileResponse> GetMyProfileAsync(
+    string email,
+    CancellationToken cancellationToken = default);
+
+    Task<PatientProfileResponse> UpdateMyProfileAsync(
+        string email,
+        UpdatePatientProfileRequest request,
+        CancellationToken cancellationToken = default);
 }
