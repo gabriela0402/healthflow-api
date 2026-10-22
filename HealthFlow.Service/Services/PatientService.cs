@@ -1,9 +1,10 @@
-﻿using System.Net.Mail;
-using HealthFlow.Model.DTOs.Patients;
+﻿using HealthFlow.Model.DTOs.Patients;
 using HealthFlow.Model.Entities;
 using HealthFlow.Repository.Interfaces;
 using HealthFlow.Service.Exceptions;
 using HealthFlow.Service.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using System.Net.Mail;
 
 namespace HealthFlow.Service.Services;
 
@@ -11,6 +12,8 @@ public sealed class PatientService : IPatientService
 {
     private readonly IPatientRepository _patientRepository;
     private readonly IUserRepository _userRepository;
+    private readonly PasswordHasher<User> _passwordHasher = new();
+
 
     public PatientService(
         IPatientRepository patientRepository,
@@ -21,36 +24,81 @@ public sealed class PatientService : IPatientService
     }
 
     public async Task<PatientResponse> CreateAsync(
-        CreatePatientRequest request,
-        CancellationToken cancellationToken = default)
+    CreatePatientRequest request,
+    CancellationToken cancellationToken = default)
     {
-        ValidateCreateRequest(request);
-
-        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
-
-        var existingPatient =
-            await _patientRepository.GetByEmailAsync(
-                normalizedEmail,
-                cancellationToken);
-
-        if (existingPatient is not null)
+        if (string.IsNullOrWhiteSpace(request.FullName) ||
+            request.FullName.Trim().Length < 3)
         {
             throw new BusinessRuleException(
-                "Já existe um paciente cadastrado com este e-mail.");
+                "O nome completo deve possuir pelo menos 3 caracteres.");
         }
 
-        var patient = new Patient(
-            request.FullName.Trim(),
-            normalizedEmail,
-            request.Phone.Trim(),
-            request.DateOfBirth.Date);
+        if (string.IsNullOrWhiteSpace(request.Email) || !IsValidEmail(request.Email))
+        {
+            throw new BusinessRuleException("O e-mail informado é inválido.");
+        }
 
-        await _patientRepository.AddAsync(
-            patient,
-            cancellationToken);
+        if (string.IsNullOrWhiteSpace(request.Password) ||
+            request.Password.Length < 6)
+        {
+            throw new BusinessRuleException(
+                "A senha inicial deve possuir pelo menos 6 caracteres.");
+        }
 
-        await _patientRepository.SaveChangesAsync(
-            cancellationToken);
+        DateTime? dateOfBirth = null;
+
+        if (request.DateOfBirth.HasValue)
+        {
+            dateOfBirth = request.DateOfBirth.Value.Date;
+
+            if (dateOfBirth > DateTime.UtcNow.Date || dateOfBirth.Value.Year <= 1900)
+            {
+                throw new BusinessRuleException(
+                    "A data de nascimento é inválida.");
+            }
+        }
+
+        string? cpf = null;
+
+        if (!string.IsNullOrWhiteSpace(request.Cpf))
+        {
+            cpf = new string(request.Cpf.Where(char.IsDigit).ToArray());
+
+            if (!IsValidCpf(cpf))
+            {
+                throw new BusinessRuleException("O CPF informado é inválido.");
+            }
+        }
+
+        var email = request.Email.Trim().ToLowerInvariant();
+        var fullName = request.FullName.Trim();
+
+        if (await _patientRepository.GetByEmailAsync(email, cancellationToken) is not null ||
+            await _userRepository.GetByEmailAsync(email, cancellationToken) is not null)
+        {
+            throw new BusinessRuleException(
+                "Já existe um cadastro com este e-mail.");
+        }
+
+        var user = new User(fullName, email, string.Empty, "Patient");
+        user.SetPasswordHash(_passwordHasher.HashPassword(user, request.Password));
+
+        var patient = new Patient(fullName, email);
+        patient.UpdateProfile(
+            fullName,
+            NullIfEmpty(request.Phone),
+            dateOfBirth,
+            NullIfEmpty(request.Gender),
+            cpf,
+            NullIfEmpty(request.Address),
+            null,
+            null);
+
+        await _userRepository.AddAsync(user, cancellationToken);
+        await _patientRepository.AddAsync(patient, cancellationToken);
+
+        await _patientRepository.SaveChangesAsync(cancellationToken);
 
         return PatientResponse.FromEntity(patient);
     }
@@ -276,4 +324,6 @@ public sealed class PatientService : IPatientService
             .Select(patient => PatientListItemResponse.FromEntity(patient, now))
             .ToList();
     }
+
+
 }

@@ -3,5 +3,9 @@
 public sealed record CreatePatientRequest(
     string FullName,
     string Email,
-    string Phone,
-    DateTime DateOfBirth);
+    string Password,
+    string? Phone,
+    DateTime? DateOfBirth,
+    string? Gender,
+    string? Cpf,
+    string? Address);
