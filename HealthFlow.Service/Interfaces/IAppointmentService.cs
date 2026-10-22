@@ -30,4 +30,7 @@ public interface IAppointmentService
     Task<IReadOnlyList<AppointmentListItemResponse>> GetMyAppointmentsAsync(
         string email,
         CancellationToken cancellationToken = default);
+    Task<int> GetPatientIdByEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default);
 }

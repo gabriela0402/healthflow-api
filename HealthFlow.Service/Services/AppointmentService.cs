@@ -229,4 +229,21 @@ public class AppointmentService : IAppointmentService
             .ToList();
     }
 
+    public async Task<int> GetPatientIdByEmailAsync(
+    string email,
+    CancellationToken cancellationToken = default)
+    {
+        var patient = await _patientRepository.GetByEmailAsync(
+            email.Trim().ToLowerInvariant(),
+            cancellationToken);
+
+        if (patient is null)
+        {
+            throw new BusinessRuleException(
+                "Paciente não encontrado para o usuário logado.");
+        }
+
+        return patient.Id;
+    }
+
 }

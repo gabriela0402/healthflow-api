@@ -22,4 +22,7 @@ public interface IPatientService
         string email,
         UpdatePatientProfileRequest request,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<PatientListItemResponse>> GetOverviewAsync(
+        CancellationToken cancellationToken = default);
 }

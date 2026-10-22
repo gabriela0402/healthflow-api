@@ -59,6 +59,7 @@ public class ProfessionalsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<ProfessionalResponse>>
         Create(
             CreateProfessionalRequest request,
@@ -76,6 +77,7 @@ public class ProfessionalsController : ControllerBase
     }
 
     [HttpPost("{professionalId:int}/availability")]
+    [Authorize(Roles = "Admin")]
     public async Task<
         ActionResult<ProfessionalAvailabilityResponse>>
         CreateAvailability(

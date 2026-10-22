@@ -263,4 +263,17 @@ public sealed class PatientService : IPatientService
         return CheckDigit(digits, 9) == digits[9] - '0' &&
                CheckDigit(digits, 10) == digits[10] - '0';
     }
+
+    public async Task<IReadOnlyList<PatientListItemResponse>> GetOverviewAsync(
+    CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.Now;
+
+        var patients = await _patientRepository.GetAllWithAppointmentsAsync(
+            cancellationToken);
+
+        return patients
+            .Select(patient => PatientListItemResponse.FromEntity(patient, now))
+            .ToList();
+    }
 }

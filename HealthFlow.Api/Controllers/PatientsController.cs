@@ -90,4 +90,12 @@ public class PatientsController : ControllerBase
             request,
             cancellationToken));
     }
+
+    [HttpGet("overview")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IReadOnlyList<PatientListItemResponse>>> GetOverview(
+    CancellationToken cancellationToken)
+    {
+        return Ok(await _patientService.GetOverviewAsync(cancellationToken));
+    }
 }

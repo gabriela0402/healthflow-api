@@ -29,6 +29,7 @@ public class SpecialtiesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<SpecialtyResponse>> Create(
         CreateSpecialtyRequest request,
         CancellationToken cancellationToken)

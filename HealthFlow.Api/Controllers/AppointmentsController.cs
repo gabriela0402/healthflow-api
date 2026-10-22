@@ -52,6 +52,22 @@ public class AppointmentsController : ControllerBase
         CreateAppointmentRequest request,
         CancellationToken cancellationToken)
     {
+        if (User.IsInRole("Admin") is false)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return Unauthorized();
+            }
+
+            var patientId = await _appointmentService.GetPatientIdByEmailAsync(
+                email,
+                cancellationToken);
+
+            request = request with { PatientId = patientId };
+        }
+
         var appointment = await _appointmentService.CreateAsync(
             request,
             cancellationToken);

@@ -55,4 +55,13 @@ public class PatientRepository : IPatientRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+    public async Task<IReadOnlyList<Patient>> GetAllWithAppointmentsAsync(
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Patients
+            .AsNoTracking()
+            .Include(patient => patient.Appointments)
+            .OrderBy(patient => patient.FullName)
+            .ToListAsync(cancellationToken);
+    }
 }
