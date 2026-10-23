@@ -2,14 +2,8 @@
 
 namespace HealthFlow.Model.DTOs.Specialties;
 
-public sealed record SpecialtyResponse(
-    int Id,
-    string Name)
+public record SpecialtyResponse(int Id, string Name, string? Description)
 {
-    public static SpecialtyResponse FromEntity(Specialty specialty)
-    {
-        return new SpecialtyResponse(
-            specialty.Id,
-            specialty.Name);
-    }
+    public static SpecialtyResponse FromEntity(Specialty specialty) =>
+        new(specialty.Id, specialty.Name, specialty.Description);
 }

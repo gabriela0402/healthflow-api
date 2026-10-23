@@ -66,7 +66,6 @@ public class AppointmentService : IAppointmentService
         }
 
         var scheduledAt = request.ScheduledAt
-            .ToLocalTime()
             .AddSeconds(-request.ScheduledAt.Second);
 
         var alreadyExists =

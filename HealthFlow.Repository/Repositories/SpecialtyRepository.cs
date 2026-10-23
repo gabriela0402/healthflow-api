@@ -47,4 +47,31 @@ public sealed class SpecialtyRepository : ISpecialtyRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<Specialty?> GetByIdAsync(
+    int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Specialties
+            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
+
+    public async Task<bool> ExistsByNameAsync(
+        string name, int? excludeId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Specialties.AnyAsync(
+            s => s.Name == name && (excludeId == null || s.Id != excludeId),
+            cancellationToken);
+    }
+
+    public async Task<bool> HasProfessionalsAsync(
+        int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Professionals
+            .AnyAsync(p => p.SpecialtyId == id, cancellationToken);
+    }
+
+    public void Remove(Specialty specialty)
+    {
+        _context.Specialties.Remove(specialty);
+    }
 }

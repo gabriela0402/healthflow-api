@@ -10,4 +10,10 @@ public interface ISpecialtyService
 
     Task<IReadOnlyList<SpecialtyResponse>> GetAllAsync(
         CancellationToken cancellationToken = default);
+
+    Task<SpecialtyResponse> UpdateAsync(
+        int id, UpdateSpecialtyRequest request, CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(
+        int id, CancellationToken cancellationToken = default);
 }

@@ -17,4 +17,13 @@ public interface ISpecialtyRepository
 
     Task SaveChangesAsync(
         CancellationToken cancellationToken = default);
+
+    Task<Specialty?> GetByIdAsync(
+        int id, CancellationToken cancellationToken = default);
+    Task<bool> ExistsByNameAsync(
+        string name, int? excludeId, CancellationToken cancellationToken = default);
+    Task<bool> HasProfessionalsAsync(
+        int id, CancellationToken cancellationToken = default);
+    void Remove(
+        Specialty specialty);
 }

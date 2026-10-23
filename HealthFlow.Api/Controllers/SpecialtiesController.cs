@@ -40,4 +40,20 @@ public class SpecialtiesController : ControllerBase
 
         return Created(string.Empty, specialty);
     }
+
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<SpecialtyResponse>> Update(
+    int id, UpdateSpecialtyRequest request, CancellationToken cancellationToken)
+    {
+        return Ok(await _specialtyService.UpdateAsync(id, request, cancellationToken));
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        await _specialtyService.DeleteAsync(id, cancellationToken);
+        return NoContent();
+    }
 }

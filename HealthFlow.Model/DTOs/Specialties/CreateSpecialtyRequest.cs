@@ -1,3 +1,3 @@
 ﻿namespace HealthFlow.Model.DTOs.Specialties;
 
-public sealed record CreateSpecialtyRequest(string Name);
+public record CreateSpecialtyRequest(string Name, string? Description);
