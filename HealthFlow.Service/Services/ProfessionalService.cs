@@ -8,13 +8,15 @@ namespace HealthFlow.Service.Services;
 
 public class ProfessionalService : IProfessionalService
 {
-    private readonly IProfessionalRepository
-        _professionalRepository;
+    private readonly IProfessionalRepository _professionalRepository;
+    private readonly ISpecialtyRepository _specialtyRepository;
 
     public ProfessionalService(
-        IProfessionalRepository professionalRepository)
+        IProfessionalRepository professionalRepository,
+        ISpecialtyRepository specialtyRepository)
     {
         _professionalRepository = professionalRepository;
+        _specialtyRepository = specialtyRepository;
     }
 
     public async Task<ProfessionalResponse> CreateAsync(
@@ -54,6 +56,15 @@ public class ProfessionalService : IProfessionalService
             throw new BusinessRuleException(
                 "Esse registro profissional já está cadastrado.");
         }
+        var specialty = await _specialtyRepository.GetByIdAsync(
+            request.SpecialtyId,
+            cancellationToken);
+
+                if (specialty is null)
+                {
+                    throw new BusinessRuleException(
+                        "A especialidade informada não existe.");
+                }
 
         var professional = new Professional(
             request.FullName.Trim(),
