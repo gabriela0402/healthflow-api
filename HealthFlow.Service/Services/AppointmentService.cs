@@ -246,4 +246,15 @@ public class AppointmentService : IAppointmentService
         return patient.Id;
     }
 
+    public async Task<IReadOnlyList<AppointmentAdminItemResponse>> GetOverviewAsync(
+    CancellationToken cancellationToken = default)
+    {
+        var appointments = await _appointmentRepository.GetAllDetailedAsync(
+            cancellationToken);
+
+        return appointments
+            .Select(AppointmentAdminItemResponse.FromEntity)
+            .ToList();
+    }
+
 }

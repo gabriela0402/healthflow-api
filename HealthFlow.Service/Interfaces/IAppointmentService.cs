@@ -33,4 +33,6 @@ public interface IAppointmentService
     Task<int> GetPatientIdByEmailAsync(
         string email,
         CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<AppointmentAdminItemResponse>> GetOverviewAsync(
+        CancellationToken cancellationToken = default);
 }

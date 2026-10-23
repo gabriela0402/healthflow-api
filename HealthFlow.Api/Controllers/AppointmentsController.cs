@@ -133,4 +133,12 @@ public class AppointmentsController : ControllerBase
         return Ok(appointments);
     }
 
+    [HttpGet("overview")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IReadOnlyList<AppointmentAdminItemResponse>>> GetOverview(
+    CancellationToken cancellationToken)
+    {
+        return Ok(await _appointmentService.GetOverviewAsync(cancellationToken));
+    }
+
 }

@@ -50,13 +50,15 @@ public sealed class PatientService : IPatientService
 
         if (request.DateOfBirth.HasValue)
         {
-            dateOfBirth = request.DateOfBirth.Value.Date;
+            var birth = request.DateOfBirth.Value.Date;
 
-            if (dateOfBirth > DateTime.UtcNow.Date || dateOfBirth.Value.Year <= 1900)
+            if (birth > DateTime.UtcNow.Date || birth.Year <= 1900)
             {
                 throw new BusinessRuleException(
                     "A data de nascimento é inválida.");
             }
+
+            dateOfBirth = birth;
         }
 
         string? cpf = null;
@@ -134,45 +136,6 @@ public sealed class PatientService : IPatientService
             .ToList();
     }
 
-    private static void ValidateCreateRequest(
-        CreatePatientRequest request)
-    {
-        if (string.IsNullOrWhiteSpace(request.FullName))
-        {
-            throw new BusinessRuleException(
-                "O nome completo é obrigatório.");
-        }
-
-        if (request.FullName.Trim().Length < 3)
-        {
-            throw new BusinessRuleException(
-                "O nome completo deve possuir pelo menos 3 caracteres.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Email))
-        {
-            throw new BusinessRuleException(
-                "O e-mail é obrigatório.");
-        }
-
-        if (!IsValidEmail(request.Email))
-        {
-            throw new BusinessRuleException(
-                "O e-mail informado é inválido.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Phone))
-        {
-            throw new BusinessRuleException(
-                "O telefone é obrigatório.");
-        }
-
-        if (request.DateOfBirth.Date > DateTime.UtcNow.Date)
-        {
-            throw new BusinessRuleException(
-                "A data de nascimento não pode estar no futuro.");
-        }
-    }
 
     private static bool IsValidEmail(string email)
     {

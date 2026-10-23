@@ -79,5 +79,16 @@ public class AppointmentRepository : IAppointmentRepository
             .OrderBy(appointment => appointment.ScheduledAt)
             .ToListAsync(cancellationToken);
     }
+    public async Task<IReadOnlyList<Appointment>> GetAllDetailedAsync(
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Appointments
+            .AsNoTracking()
+            .Include(a => a.Patient)
+            .Include(a => a.Professional)
+                .ThenInclude(p => p.Specialty)
+            .OrderBy(a => a.ScheduledAt)
+            .ToListAsync(cancellationToken);
+    }
 
 }
