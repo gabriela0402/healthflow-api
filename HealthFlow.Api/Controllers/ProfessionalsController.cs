@@ -130,4 +130,12 @@ public class ProfessionalsController : ControllerBase
         await _professionalService.DeleteAsync(id, cancellationToken);
         return NoContent();
     }
+
+    [HttpGet("overview")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IReadOnlyList<ProfessionalAdminResponse>>> GetOverview(
+    CancellationToken cancellationToken)
+    {
+        return Ok(await _professionalService.GetOverviewAsync(cancellationToken));
+    }
 }

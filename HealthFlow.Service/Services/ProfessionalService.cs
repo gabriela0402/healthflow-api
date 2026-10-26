@@ -302,4 +302,14 @@ public class ProfessionalService : IProfessionalService
 
         await _professionalRepository.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<ProfessionalAdminResponse>> GetOverviewAsync(
+    CancellationToken cancellationToken = default)
+    {
+        var professionals = await _professionalRepository.GetAllAsync(cancellationToken);
+
+        return professionals
+            .Select(ProfessionalAdminResponse.FromEntity)
+            .ToList();
+    }
 }
