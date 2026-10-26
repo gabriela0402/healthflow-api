@@ -61,4 +61,27 @@ public class ProfessionalRepository : IProfessionalRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<Professional?> GetByEmailAsync(
+    string email,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Professionals
+            .FirstOrDefaultAsync(
+                professional => professional.Email == email,
+                cancellationToken);
+    }
+
+    public async Task<bool> HasAppointmentsAsync(
+    int id,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Appointments
+            .AnyAsync(a => a.ProfessionalId == id, cancellationToken);
+    }
+
+    public void Remove(Professional professional)
+    {
+        _context.Professionals.Remove(professional);
+    }
 }

@@ -110,4 +110,24 @@ public class ProfessionalsController : ControllerBase
 
         return Ok(availabilities);
     }
+
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<ProfessionalResponse>> Update(
+    int id,
+    UpdateProfessionalRequest request,
+    CancellationToken cancellationToken)
+    {
+        return Ok(await _professionalService.UpdateAsync(id, request, cancellationToken));
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(
+    int id,
+    CancellationToken cancellationToken)
+    {
+        await _professionalService.DeleteAsync(id, cancellationToken);
+        return NoContent();
+    }
 }

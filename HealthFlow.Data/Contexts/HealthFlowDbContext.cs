@@ -54,6 +54,10 @@ public class HealthFlowDbContext : DbContext
                 availability.DayOfWeek)
             .HasConversion<string>();
 
+        modelBuilder.Entity<Professional>()
+            .HasIndex(professional => professional.Email)
+            .IsUnique();
+
         base.OnModelCreating(modelBuilder);
     }
 }

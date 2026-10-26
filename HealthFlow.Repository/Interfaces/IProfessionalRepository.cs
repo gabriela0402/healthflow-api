@@ -21,4 +21,14 @@ public interface IProfessionalRepository
 
     Task SaveChangesAsync(
         CancellationToken cancellationToken = default);
+
+    Task<Professional?> GetByEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> HasAppointmentsAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    void Remove(Professional professional);
 }

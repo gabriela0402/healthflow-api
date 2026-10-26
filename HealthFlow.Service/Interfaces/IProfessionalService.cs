@@ -14,4 +14,11 @@ public interface IProfessionalService
 
     Task<IReadOnlyList<ProfessionalResponse>> GetAllAsync(
         CancellationToken cancellationToken = default);
+
+    Task<ProfessionalResponse> UpdateAsync(
+        int id,
+        UpdateProfessionalRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(int id, CancellationToken cancellationToken = default);
 }

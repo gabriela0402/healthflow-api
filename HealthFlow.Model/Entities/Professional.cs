@@ -5,6 +5,7 @@ public class Professional
     public int Id { get; private set; }
 
     public string FullName { get; private set; } = string.Empty;
+    public string? Email { get; private set; }
 
     public string RegistrationNumber { get; private set; } =
         string.Empty;
@@ -30,12 +31,26 @@ public class Professional
     }
 
     public Professional(
-        string fullName,
-        string registrationNumber,
-        int specialtyId)
+    string fullName,
+    string registrationNumber,
+    int specialtyId,
+    string? email = null)
     {
         FullName = fullName;
         RegistrationNumber = registrationNumber;
         SpecialtyId = specialtyId;
+        Email = email;
+    }
+
+    public void Update(string fullName, string registrationNumber, int specialtyId)
+    {
+        FullName = fullName;
+        RegistrationNumber = registrationNumber;
+        SpecialtyId = specialtyId;
+    }
+
+    public void SetEmail(string email)
+    {
+        Email = email;
     }
 }

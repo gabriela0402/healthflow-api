@@ -38,4 +38,9 @@ public class UserRepository : IUserRepository
     {
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public void Remove(User user)
+    {
+        _context.Users.Remove(user);
+    }
 }
