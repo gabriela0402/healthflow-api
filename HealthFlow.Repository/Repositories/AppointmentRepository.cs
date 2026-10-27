@@ -91,4 +91,16 @@ public class AppointmentRepository : IAppointmentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Appointment>> GetByProfessionalIdAsync(
+    int professionalId,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Appointments
+            .AsNoTracking()
+            .Include(a => a.Patient)
+            .Where(a => a.ProfessionalId == professionalId)
+            .OrderBy(a => a.ScheduledAt)
+            .ToListAsync(cancellationToken);
+    }
+
 }

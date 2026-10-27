@@ -29,4 +29,8 @@ public interface IAppointmentRepository
 
     Task<IReadOnlyList<Appointment>> GetAllDetailedAsync(
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Appointment>> GetByProfessionalIdAsync(
+        int professionalId,
+        CancellationToken cancellationToken = default);
 }

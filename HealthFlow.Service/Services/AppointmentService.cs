@@ -1,9 +1,10 @@
 ﻿using HealthFlow.Model.DTOs.Appointments;
+using HealthFlow.Model.DTOs.Patients;
 using HealthFlow.Model.Entities;
+using HealthFlow.Model.Enums;
 using HealthFlow.Repository.Interfaces;
 using HealthFlow.Service.Exceptions;
 using HealthFlow.Service.Interfaces;
-using HealthFlow.Model.Enums;
 namespace HealthFlow.Service.Services;
 
 public class AppointmentService : IAppointmentService
@@ -253,6 +254,33 @@ public class AppointmentService : IAppointmentService
 
         return appointments
             .Select(AppointmentAdminItemResponse.FromEntity)
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<ProfessionalPatientResponse>> GetMyPatientsAsync(
+    string email,
+    CancellationToken cancellationToken = default)
+    {
+        var professional = await _professionalRepository.GetByEmailAsync(
+            email.Trim().ToLowerInvariant(),
+            cancellationToken);
+
+        if (professional is null)
+        {
+            throw new BusinessRuleException(
+                "Profissional não encontrado para o usuário logado.");
+        }
+
+        var appointments = await _appointmentRepository.GetByProfessionalIdAsync(
+            professional.Id,
+            cancellationToken);
+
+        var now = DateTime.Now;
+
+        return appointments
+            .GroupBy(a => a.PatientId)
+            .Select(group => ProfessionalPatientResponse.FromAppointments(group.ToList(), now))
+            .OrderBy(p => p.FullName)
             .ToList();
     }
 

@@ -1,4 +1,5 @@
 ﻿using HealthFlow.Model.DTOs.Appointments;
+using HealthFlow.Model.DTOs.Patients;
 
 namespace HealthFlow.Service.Interfaces;
 
@@ -34,5 +35,9 @@ public interface IAppointmentService
         string email,
         CancellationToken cancellationToken = default);
     Task<IReadOnlyList<AppointmentAdminItemResponse>> GetOverviewAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<ProfessionalPatientResponse>> GetMyPatientsAsync(
+        string email,
         CancellationToken cancellationToken = default);
 }
