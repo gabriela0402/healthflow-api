@@ -146,4 +146,31 @@ public class ProfessionalAvailabilityService
                     .FromEntity)
             .ToList();
     }
+
+    public async Task<IReadOnlyList<ProfessionalAvailabilityResponse>> GetMineAsync(
+    string email, CancellationToken cancellationToken = default)
+    {
+        var id = await GetProfessionalIdAsync(email, cancellationToken);
+        return await GetByProfessionalIdAsync(id, cancellationToken);
+    }
+
+    public async Task<ProfessionalAvailabilityResponse> CreateMineAsync(
+        string email,
+        CreateProfessionalAvailabilityRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var id = await GetProfessionalIdAsync(email, cancellationToken);
+        return await CreateAsync(id, request, cancellationToken);
+    }
+
+    private async Task<int> GetProfessionalIdAsync(
+        string email, CancellationToken cancellationToken)
+    {
+        var professional = await _professionalRepository.GetByEmailAsync(
+            email.Trim().ToLowerInvariant(), cancellationToken)
+            ?? throw new BusinessRuleException(
+                "Profissional não encontrado para o usuário logado.");
+
+        return professional.Id;
+    }
 }

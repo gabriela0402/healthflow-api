@@ -3,6 +3,7 @@ using HealthFlow.Model.DTOs.Professionals;
 using HealthFlow.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthFlow.Api.Controllers;
 
@@ -137,5 +138,28 @@ public class ProfessionalsController : ControllerBase
     CancellationToken cancellationToken)
     {
         return Ok(await _professionalService.GetOverviewAsync(cancellationToken));
+    }
+
+    [HttpGet("me/availability")]
+    [Authorize(Roles = "Professional")]
+    public async Task<ActionResult<IReadOnlyList<ProfessionalAvailabilityResponse>>> GetMyAvailability(
+    CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email)) return Unauthorized();
+
+        return Ok(await _availabilityService.GetMineAsync(email, cancellationToken));
+    }
+
+    [HttpPost("me/availability")]
+    [Authorize(Roles = "Professional")]
+    public async Task<ActionResult<ProfessionalAvailabilityResponse>> CreateMyAvailability(
+        CreateProfessionalAvailabilityRequest request,
+        CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email)) return Unauthorized();
+
+        return Ok(await _availabilityService.CreateMineAsync(email, request, cancellationToken));
     }
 }
