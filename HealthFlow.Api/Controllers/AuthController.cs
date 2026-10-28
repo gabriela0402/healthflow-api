@@ -1,6 +1,8 @@
 ﻿using HealthFlow.Model.DTOs.Auth;
 using HealthFlow.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthFlow.Api.Controllers;
 
@@ -37,5 +39,18 @@ public class AuthController : ControllerBase
             cancellationToken);
 
         return Ok(response);
+    }
+
+    [HttpPut("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword(
+    ChangePasswordRequest request,
+    CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email)) return Unauthorized();
+
+        await _authService.ChangePasswordAsync(email, request, cancellationToken);
+        return NoContent();
     }
 }

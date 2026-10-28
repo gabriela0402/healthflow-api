@@ -212,4 +212,33 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler()
             .WriteToken(token);
     }
+
+    public async Task ChangePasswordAsync(
+    string email,
+    ChangePasswordRequest request,
+    CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.NewPassword) ||
+            request.NewPassword.Length < 6)
+        {
+            throw new BusinessRuleException(
+                "A nova senha deve possuir pelo menos 6 caracteres.");
+        }
+
+        var user = await _userRepository.GetByEmailAsync(
+            email.Trim().ToLowerInvariant(), cancellationToken)
+            ?? throw new BusinessRuleException("Usuário não encontrado.");
+
+        var result = _passwordHasher.VerifyHashedPassword(
+            user, user.PasswordHash, request.CurrentPassword ?? string.Empty);
+
+        if (result == PasswordVerificationResult.Failed)
+        {
+            throw new BusinessRuleException("A senha atual está incorreta.");
+        }
+
+        user.SetPasswordHash(_passwordHasher.HashPassword(user, request.NewPassword));
+
+        await _userRepository.SaveChangesAsync(cancellationToken);
+    }
 }

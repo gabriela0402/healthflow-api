@@ -30,6 +30,9 @@ public class HealthFlowDbContext : DbContext
     public DbSet<User> Users =>
         Set<User>();
 
+    public DbSet<ClinicSettings> Settings => 
+        Set<ClinicSettings>();
+
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {

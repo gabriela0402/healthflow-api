@@ -7,20 +7,24 @@ using HealthFlow.Service.Exceptions;
 using HealthFlow.Service.Interfaces;
 namespace HealthFlow.Service.Services;
 
+
 public class AppointmentService : IAppointmentService
 {
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IPatientRepository _patientRepository;
     private readonly IProfessionalRepository _professionalRepository;
+    private readonly IClinicSettingsRepository _settingsRepository; 
 
     public AppointmentService(
         IAppointmentRepository appointmentRepository,
         IPatientRepository patientRepository,
-        IProfessionalRepository professionalRepository)
+        IProfessionalRepository professionalRepository,
+        IClinicSettingsRepository settingsRepository)             
     {
         _appointmentRepository = appointmentRepository;
         _patientRepository = patientRepository;
         _professionalRepository = professionalRepository;
+        _settingsRepository = settingsRepository;           
     }
 
     public async Task<AppointmentResponse> CreateAsync(
@@ -86,6 +90,17 @@ public class AppointmentService : IAppointmentService
             request.ProfessionalId,
             scheduledAt,
             request.Notes);
+
+        var settings = await _settingsRepository.GetAsync(cancellationToken);
+
+        if (settings?.AutomaticConfirmation == true)
+        {
+            appointment.Confirm();
+        }
+
+        await _appointmentRepository.AddAsync(
+            appointment,
+            cancellationToken);
 
         await _appointmentRepository.AddAsync(
             appointment,

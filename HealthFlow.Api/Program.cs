@@ -49,10 +49,10 @@ builder.Services.AddScoped< IProfessionalRepository,ProfessionalRepository>();
 builder.Services.AddScoped< IProfessionalService, ProfessionalService>();
 builder.Services.AddScoped<IAppointmentRepository,AppointmentRepository>();
 builder.Services.AddScoped<IProfessionalAvailabilityRepository,ProfessionalAvailabilityRepository>();
-
+builder.Services.AddScoped<IClinicSettingsRepository, ClinicSettingsRepository>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped< IAppointmentService,AppointmentService>();
 builder.Services.AddScoped< IProfessionalAvailabilityService,ProfessionalAvailabilityService>();
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 

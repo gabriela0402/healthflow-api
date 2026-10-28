@@ -43,4 +43,13 @@ public class UserRepository : IUserRepository
     {
         _context.Users.Remove(user);
     }
+
+    public async Task<IReadOnlyList<User>> GetAllAsync(
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .AsNoTracking()
+            .OrderBy(user => user.Name)
+            .ToListAsync(cancellationToken);
+    }
 }
