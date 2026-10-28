@@ -284,4 +284,44 @@ public class AppointmentService : IAppointmentService
             .ToList();
     }
 
+    public async Task<IReadOnlyList<AppointmentProfessionalItemResponse>> GetMyScheduleAsync(
+    string email,
+    CancellationToken cancellationToken = default)
+    {
+        var professional = await _professionalRepository.GetByEmailAsync(
+            email.Trim().ToLowerInvariant(),
+            cancellationToken)
+            ?? throw new BusinessRuleException(
+                "Profissional não encontrado para o usuário logado.");
+
+        var appointments = await _appointmentRepository.GetByProfessionalIdAsync(
+            professional.Id,
+            cancellationToken);
+
+        return appointments
+            .Select(AppointmentProfessionalItemResponse.FromEntity)
+            .ToList();
+    }
+
+    public async Task EnsureProfessionalOwnsAsync(
+        int appointmentId,
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        var professional = await _professionalRepository.GetByEmailAsync(
+            email.Trim().ToLowerInvariant(),
+            cancellationToken);
+
+        var appointment = await _appointmentRepository.GetByIdAsync(
+            appointmentId,
+            cancellationToken);
+
+        if (professional is null || appointment is null ||
+            appointment.ProfessionalId != professional.Id)
+        {
+            throw new BusinessRuleException(
+                "Você não tem permissão para alterar este agendamento.");
+        }
+    }
+
 }

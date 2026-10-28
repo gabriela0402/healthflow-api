@@ -80,6 +80,7 @@ public class AppointmentsController : ControllerBase
     }
 
     [HttpPut("{id:int}/confirm")]
+    [Authorize(Roles = "Admin,Professional")]
     public async Task<ActionResult<AppointmentResponse>> Confirm(
     int id,
     CancellationToken cancellationToken)
@@ -92,6 +93,7 @@ public class AppointmentsController : ControllerBase
     }
 
     [HttpPut("{id:int}/cancel")]
+    [Authorize(Roles = "Admin,Professional")]
     public async Task<ActionResult<AppointmentResponse>> Cancel(
         int id,
         CancellationToken cancellationToken)
@@ -104,6 +106,7 @@ public class AppointmentsController : ControllerBase
     }
 
     [HttpPut("{id:int}/complete")]
+    [Authorize(Roles = "Admin,Professional")]
     public async Task<ActionResult<AppointmentResponse>> Complete(
         int id,
         CancellationToken cancellationToken)
@@ -155,6 +158,29 @@ public class AppointmentsController : ControllerBase
         }
 
         return Ok(await _appointmentService.GetMyPatientsAsync(email, cancellationToken));
+    }
+
+    [HttpGet("my-schedule")]
+    [Authorize(Roles = "Professional")]
+    public async Task<ActionResult<IReadOnlyList<AppointmentProfessionalItemResponse>>> GetMySchedule(
+    CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Unauthorized();
+        }
+
+        return Ok(await _appointmentService.GetMyScheduleAsync(email, cancellationToken));
+    }
+
+    private async Task EnsureCanChangeAsync(int id, CancellationToken cancellationToken)
+    {
+        if (User.IsInRole("Admin")) return;
+
+        var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+        await _appointmentService.EnsureProfessionalOwnsAsync(id, email, cancellationToken);
     }
 
 }

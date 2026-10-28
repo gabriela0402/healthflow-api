@@ -40,4 +40,13 @@ public interface IAppointmentService
     Task<IReadOnlyList<ProfessionalPatientResponse>> GetMyPatientsAsync(
         string email,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<AppointmentProfessionalItemResponse>> GetMyScheduleAsync(
+        string email,
+        CancellationToken cancellationToken = default);
+
+    Task EnsureProfessionalOwnsAsync(
+        int appointmentId,
+        string email,
+        CancellationToken cancellationToken = default);
 }
