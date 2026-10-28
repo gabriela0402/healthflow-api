@@ -312,4 +312,44 @@ public class ProfessionalService : IProfessionalService
             .Select(ProfessionalAdminResponse.FromEntity)
             .ToList();
     }
+
+    public async Task<ProfessionalProfileResponse> GetMyProfileAsync(
+    string email, CancellationToken cancellationToken = default)
+    {
+        var professional = await GetByEmailOrThrowAsync(email, cancellationToken);
+        return ProfessionalProfileResponse.FromEntity(professional);
+    }
+
+    public async Task<ProfessionalProfileResponse> UpdateMyProfileAsync(
+        string email,
+        UpdateProfessionalProfileRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var fullName = ValidateName(request.FullName);
+        var professional = await GetByEmailOrThrowAsync(email, cancellationToken);
+
+        var phone = string.IsNullOrWhiteSpace(request.Phone)
+            ? null
+            : request.Phone.Trim();
+
+        professional.UpdateProfile(fullName, phone);
+
+        var user = await _userRepository.GetByEmailAsync(
+            professional.Email!, cancellationToken);
+
+        user?.SetName(fullName);
+
+        await _professionalRepository.SaveChangesAsync(cancellationToken);
+
+        return ProfessionalProfileResponse.FromEntity(professional);
+    }
+
+    private async Task<Professional> GetByEmailOrThrowAsync(
+        string email, CancellationToken cancellationToken)
+    {
+        return await _professionalRepository.GetByEmailAsync(
+                   email.Trim().ToLowerInvariant(), cancellationToken)
+               ?? throw new BusinessRuleException(
+                   "Profissional não encontrado para o usuário logado.");
+    }
 }

@@ -63,10 +63,10 @@ public class ProfessionalRepository : IProfessionalRepository
     }
 
     public async Task<Professional?> GetByEmailAsync(
-    string email,
-    CancellationToken cancellationToken = default)
+    string email, CancellationToken cancellationToken = default)
     {
         return await _context.Professionals
+            .Include(professional => professional.Specialty)
             .FirstOrDefaultAsync(
                 professional => professional.Email == email,
                 cancellationToken);

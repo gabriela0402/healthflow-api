@@ -162,4 +162,27 @@ public class ProfessionalsController : ControllerBase
 
         return Ok(await _availabilityService.CreateMineAsync(email, request, cancellationToken));
     }
+
+    [HttpGet("me")]
+    [Authorize(Roles = "Professional")]
+    public async Task<ActionResult<ProfessionalProfileResponse>> GetMine(
+    CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email)) return Unauthorized();
+
+        return Ok(await _professionalService.GetMyProfileAsync(email, cancellationToken));
+    }
+
+    [HttpPut("me")]
+    [Authorize(Roles = "Professional")]
+    public async Task<ActionResult<ProfessionalProfileResponse>> UpdateMine(
+        UpdateProfessionalProfileRequest request,
+        CancellationToken cancellationToken)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email)) return Unauthorized();
+
+        return Ok(await _professionalService.UpdateMyProfileAsync(email, request, cancellationToken));
+    }
 }

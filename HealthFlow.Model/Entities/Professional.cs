@@ -13,6 +13,7 @@ public class Professional
     public int SpecialtyId { get; private set; }
 
     public Specialty Specialty { get; private set; } = null!;
+    public string? Phone { get; private set; }
 
     public ICollection<Appointment> Appointments
     {
@@ -52,5 +53,11 @@ public class Professional
     public void SetEmail(string email)
     {
         Email = email;
+    }
+
+    public void UpdateProfile(string fullName, string? phone)
+    {
+        FullName = fullName;
+        Phone = phone;
     }
 }

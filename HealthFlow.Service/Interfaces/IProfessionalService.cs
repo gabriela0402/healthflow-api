@@ -26,4 +26,12 @@ public interface IProfessionalService
 
     Task<IReadOnlyList<ProfessionalAdminResponse>> GetOverviewAsync(
         CancellationToken cancellationToken = default);
+
+    Task<ProfessionalProfileResponse> GetMyProfileAsync(
+        string email, CancellationToken cancellationToken = default);
+
+    Task<ProfessionalProfileResponse> UpdateMyProfileAsync(
+        string email,
+        UpdateProfessionalProfileRequest request,
+        CancellationToken cancellationToken = default);
 }
