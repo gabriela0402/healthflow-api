@@ -1,4 +1,5 @@
 using HealthFlow.Api.Middlewares;
+using HealthFlow.Api.Workers;
 using HealthFlow.Data.Contexts;
 using HealthFlow.Repository.Interfaces;
 using HealthFlow.Repository.Repositories;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+
 
 
 
@@ -55,6 +57,9 @@ builder.Services.AddScoped< IAppointmentService,AppointmentService>();
 builder.Services.AddScoped< IProfessionalAvailabilityService,ProfessionalAvailabilityService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddHostedService<ReminderWorker>();
 
 // Add services to the container.
 

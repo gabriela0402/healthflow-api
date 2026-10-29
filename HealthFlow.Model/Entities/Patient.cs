@@ -16,6 +16,10 @@ public class Patient
 
     public DateTime CreatedAt { get; private set; }
 
+    public bool NotifyEmail { get; private set; } = true;
+    public bool NotifyReminders { get; private set; } = true;
+    public bool NotifyAppointmentUpdates { get; private set; } = true;
+
     public ICollection<Appointment> Appointments
     {
         get;
@@ -63,5 +67,12 @@ public class Patient
         Address = address;
         EmergencyContactName = emergencyContactName;
         EmergencyContactPhone = emergencyContactPhone;
+    }
+
+    public void UpdateNotificationPreferences(bool email, bool reminders, bool appointmentUpdates)
+    {
+        NotifyEmail = email;
+        NotifyReminders = reminders;
+        NotifyAppointmentUpdates = appointmentUpdates;
     }
 }

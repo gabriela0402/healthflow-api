@@ -5,6 +5,7 @@ using HealthFlow.Repository.Interfaces;
 using HealthFlow.Service.Exceptions;
 using HealthFlow.Service.Services;
 using Moq;
+using HealthFlow.Service.Interfaces;
 
 namespace HealthFlow.Tests.Services;
 
@@ -21,21 +22,26 @@ public class AppointmentServiceTests
 
     private readonly AppointmentService _service;
 
+    private readonly Mock<IClinicSettingsRepository>
+    _settingsRepositoryMock;
+
+    private readonly Mock<INotificationService>
+        _notificationServiceMock;
+
     public AppointmentServiceTests()
     {
-        _appointmentRepositoryMock =
-            new Mock<IAppointmentRepository>();
-
-        _patientRepositoryMock =
-            new Mock<IPatientRepository>();
-
-        _professionalRepositoryMock =
-            new Mock<IProfessionalRepository>();
+        _appointmentRepositoryMock = new Mock<IAppointmentRepository>();
+        _patientRepositoryMock = new Mock<IPatientRepository>();
+        _professionalRepositoryMock = new Mock<IProfessionalRepository>();
+        _settingsRepositoryMock = new Mock<IClinicSettingsRepository>();
+        _notificationServiceMock = new Mock<INotificationService>();
 
         _service = new AppointmentService(
             _appointmentRepositoryMock.Object,
             _patientRepositoryMock.Object,
-            _professionalRepositoryMock.Object);
+            _professionalRepositoryMock.Object,
+            _settingsRepositoryMock.Object,
+            _notificationServiceMock.Object);
     }
 
     [Fact]

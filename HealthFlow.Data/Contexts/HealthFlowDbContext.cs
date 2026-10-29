@@ -33,6 +33,9 @@ public class HealthFlowDbContext : DbContext
     public DbSet<ClinicSettings> Settings => 
         Set<ClinicSettings>();
 
+    public DbSet<Notification> Notifications => 
+        Set<Notification>();
+
     protected override void OnModelCreating(
         ModelBuilder modelBuilder)
     {

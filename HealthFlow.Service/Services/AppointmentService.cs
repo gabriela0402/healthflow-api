@@ -7,24 +7,26 @@ using HealthFlow.Service.Exceptions;
 using HealthFlow.Service.Interfaces;
 namespace HealthFlow.Service.Services;
 
-
 public class AppointmentService : IAppointmentService
 {
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IPatientRepository _patientRepository;
     private readonly IProfessionalRepository _professionalRepository;
-    private readonly IClinicSettingsRepository _settingsRepository; 
+    private readonly IClinicSettingsRepository _settingsRepository;
+    private readonly INotificationService _notificationService;       
 
     public AppointmentService(
         IAppointmentRepository appointmentRepository,
         IPatientRepository patientRepository,
         IProfessionalRepository professionalRepository,
-        IClinicSettingsRepository settingsRepository)             
+        IClinicSettingsRepository settingsRepository,
+        INotificationService notificationService)                    
     {
         _appointmentRepository = appointmentRepository;
         _patientRepository = patientRepository;
         _professionalRepository = professionalRepository;
-        _settingsRepository = settingsRepository;           
+        _settingsRepository = settingsRepository;
+        _notificationService = notificationService;                  
     }
 
     public async Task<AppointmentResponse> CreateAsync(
@@ -33,51 +35,40 @@ public class AppointmentService : IAppointmentService
     {
         if (request.PatientId <= 0)
         {
-            throw new BusinessRuleException(
-                "O paciente informado é inválido.");
+            throw new BusinessRuleException("O paciente informado é inválido.");
         }
 
         if (request.ProfessionalId <= 0)
         {
-            throw new BusinessRuleException(
-                "O profissional informado é inválido.");
+            throw new BusinessRuleException("O profissional informado é inválido.");
         }
 
         if (request.ScheduledAt <= DateTime.Now)
         {
-            throw new BusinessRuleException(
-                "A data do agendamento deve estar no futuro.");
+            throw new BusinessRuleException("A data do agendamento deve estar no futuro.");
         }
 
         var patient = await _patientRepository.GetByIdAsync(
-            request.PatientId,
-            cancellationToken);
+            request.PatientId, cancellationToken);
 
         if (patient is null)
         {
-            throw new BusinessRuleException(
-                "O paciente informado não existe.");
+            throw new BusinessRuleException("O paciente informado não existe.");
         }
 
-        var professional =
-            await _professionalRepository.GetByIdAsync(
-                request.ProfessionalId,
-                cancellationToken);
+        var professional = await _professionalRepository.GetByIdAsync(
+            request.ProfessionalId, cancellationToken);
 
         if (professional is null)
         {
-            throw new BusinessRuleException(
-                "O profissional informado não existe.");
+            throw new BusinessRuleException("O profissional informado não existe.");
         }
 
         var scheduledAt = request.ScheduledAt
             .AddSeconds(-request.ScheduledAt.Second);
 
-        var alreadyExists =
-            await _appointmentRepository.ExistsAtDateAsync(
-                request.ProfessionalId,
-                scheduledAt,
-                cancellationToken);
+        var alreadyExists = await _appointmentRepository.ExistsAtDateAsync(
+            request.ProfessionalId, scheduledAt, cancellationToken);
 
         if (alreadyExists)
         {
@@ -98,34 +89,32 @@ public class AppointmentService : IAppointmentService
             appointment.Confirm();
         }
 
-        await _appointmentRepository.AddAsync(
-            appointment,
+        await _appointmentRepository.AddAsync(appointment, cancellationToken);
+
+        var confirmed = appointment.Status == AppointmentStatus.Confirmed;
+
+        await _notificationService.NotifyAppointmentAsync(
+            patient,
+            confirmed ? "Consulta confirmada" : "Consulta agendada",
+            $"Sua consulta com {professional.FullName} " +
+            $"{(confirmed ? "foi confirmada para" : "foi agendada para")} " +
+            $"{FormatWhen(scheduledAt)}.",
             cancellationToken);
 
-        await _appointmentRepository.AddAsync(
-            appointment,
-            cancellationToken);
-
-        await _appointmentRepository.SaveChangesAsync(
-            cancellationToken);
+        await _appointmentRepository.SaveChangesAsync(cancellationToken);
 
         return AppointmentResponse.FromEntity(appointment);
     }
 
     public async Task<AppointmentResponse?> GetByIdAsync(
-        int id,
-        CancellationToken cancellationToken = default)
+        int id, CancellationToken cancellationToken = default)
     {
         if (id <= 0)
         {
-            throw new BusinessRuleException(
-                "O identificador do agendamento é inválido.");
+            throw new BusinessRuleException("O identificador do agendamento é inválido.");
         }
 
-        var appointment =
-            await _appointmentRepository.GetByIdAsync(
-                id,
-                cancellationToken);
+        var appointment = await _appointmentRepository.GetByIdAsync(id, cancellationToken);
 
         return appointment is null
             ? null
@@ -135,54 +124,53 @@ public class AppointmentService : IAppointmentService
     public async Task<IReadOnlyList<AppointmentResponse>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        var appointments =
-            await _appointmentRepository.GetAllAsync(
-                cancellationToken);
+        var appointments = await _appointmentRepository.GetAllAsync(cancellationToken);
 
-        return appointments
-            .Select(AppointmentResponse.FromEntity)
-            .ToList();
+        return appointments.Select(AppointmentResponse.FromEntity).ToList();
     }
 
     public async Task<AppointmentResponse> ConfirmAsync(
-    int id,
-    CancellationToken cancellationToken = default)
+        int id, CancellationToken cancellationToken = default)
     {
-        var appointment = await GetAppointmentOrThrowAsync(
-            id,
-            cancellationToken);
+        var appointment = await GetAppointmentOrThrowAsync(id, cancellationToken);
 
         appointment.Confirm();
 
-        await _appointmentRepository.SaveChangesAsync(
+        await _notificationService.NotifyAppointmentAsync(
+            appointment.Patient,
+            "Consulta confirmada",
+            $"Sua consulta com {appointment.Professional.FullName} foi confirmada para " +
+            $"{FormatWhen(appointment.ScheduledAt)}.",
             cancellationToken);
+
+        await _appointmentRepository.SaveChangesAsync(cancellationToken);
 
         return AppointmentResponse.FromEntity(appointment);
     }
 
     public async Task<AppointmentResponse> CancelAsync(
-        int id,
-        CancellationToken cancellationToken = default)
+        int id, CancellationToken cancellationToken = default)
     {
-        var appointment = await GetAppointmentOrThrowAsync(
-            id,
-            cancellationToken);
+        var appointment = await GetAppointmentOrThrowAsync(id, cancellationToken);
 
         appointment.Cancel();
 
-        await _appointmentRepository.SaveChangesAsync(
+        await _notificationService.NotifyAppointmentAsync(
+            appointment.Patient,
+            "Consulta cancelada",
+            $"Sua consulta com {appointment.Professional.FullName} marcada para " +
+            $"{FormatWhen(appointment.ScheduledAt)} foi cancelada.",
             cancellationToken);
+
+        await _appointmentRepository.SaveChangesAsync(cancellationToken);
 
         return AppointmentResponse.FromEntity(appointment);
     }
 
     public async Task<AppointmentResponse> CompleteAsync(
-    int id,
-    CancellationToken cancellationToken = default)
+        int id, CancellationToken cancellationToken = default)
     {
-        var appointment = await GetAppointmentOrThrowAsync(
-            id,
-            cancellationToken);
+        var appointment = await GetAppointmentOrThrowAsync(id, cancellationToken);
 
         if (appointment.Status == AppointmentStatus.Cancelled)
         {
@@ -192,42 +180,34 @@ public class AppointmentService : IAppointmentService
 
         appointment.Complete();
 
-        await _appointmentRepository.SaveChangesAsync(
-            cancellationToken);
+        await _appointmentRepository.SaveChangesAsync(cancellationToken);
 
         return AppointmentResponse.FromEntity(appointment);
     }
 
-
     private async Task<Appointment> GetAppointmentOrThrowAsync(
-        int id,
-        CancellationToken cancellationToken)
+        int id, CancellationToken cancellationToken)
     {
         if (id <= 0)
         {
-            throw new BusinessRuleException(
-                "O identificador do agendamento é inválido.");
+            throw new BusinessRuleException("O identificador do agendamento é inválido.");
         }
 
-        var appointment = await _appointmentRepository.GetByIdAsync(
-            id,
-            cancellationToken);
+        var appointment = await _appointmentRepository.GetByIdAsync(id, cancellationToken);
 
         if (appointment is null)
         {
-            throw new BusinessRuleException(
-                "Agendamento não encontrado.");
+            throw new BusinessRuleException("Agendamento não encontrado.");
         }
 
         return appointment;
     }
+
     public async Task<IReadOnlyList<AppointmentListItemResponse>> GetMyAppointmentsAsync(
-    string email,
-    CancellationToken cancellationToken = default)
+        string email, CancellationToken cancellationToken = default)
     {
         var patient = await _patientRepository.GetByEmailAsync(
-            email.Trim().ToLowerInvariant(),
-            cancellationToken);
+            email.Trim().ToLowerInvariant(), cancellationToken);
 
         if (patient is null)
         {
@@ -236,21 +216,16 @@ public class AppointmentService : IAppointmentService
         }
 
         var appointments = await _appointmentRepository.GetByPatientIdAsync(
-            patient.Id,
-            cancellationToken);
+            patient.Id, cancellationToken);
 
-        return appointments
-            .Select(AppointmentListItemResponse.FromEntity)
-            .ToList();
+        return appointments.Select(AppointmentListItemResponse.FromEntity).ToList();
     }
 
     public async Task<int> GetPatientIdByEmailAsync(
-    string email,
-    CancellationToken cancellationToken = default)
+        string email, CancellationToken cancellationToken = default)
     {
         var patient = await _patientRepository.GetByEmailAsync(
-            email.Trim().ToLowerInvariant(),
-            cancellationToken);
+            email.Trim().ToLowerInvariant(), cancellationToken);
 
         if (patient is null)
         {
@@ -262,23 +237,18 @@ public class AppointmentService : IAppointmentService
     }
 
     public async Task<IReadOnlyList<AppointmentAdminItemResponse>> GetOverviewAsync(
-    CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
-        var appointments = await _appointmentRepository.GetAllDetailedAsync(
-            cancellationToken);
+        var appointments = await _appointmentRepository.GetAllDetailedAsync(cancellationToken);
 
-        return appointments
-            .Select(AppointmentAdminItemResponse.FromEntity)
-            .ToList();
+        return appointments.Select(AppointmentAdminItemResponse.FromEntity).ToList();
     }
 
     public async Task<IReadOnlyList<ProfessionalPatientResponse>> GetMyPatientsAsync(
-    string email,
-    CancellationToken cancellationToken = default)
+        string email, CancellationToken cancellationToken = default)
     {
         var professional = await _professionalRepository.GetByEmailAsync(
-            email.Trim().ToLowerInvariant(),
-            cancellationToken);
+            email.Trim().ToLowerInvariant(), cancellationToken);
 
         if (professional is null)
         {
@@ -287,8 +257,7 @@ public class AppointmentService : IAppointmentService
         }
 
         var appointments = await _appointmentRepository.GetByProfessionalIdAsync(
-            professional.Id,
-            cancellationToken);
+            professional.Id, cancellationToken);
 
         var now = DateTime.Now;
 
@@ -300,36 +269,27 @@ public class AppointmentService : IAppointmentService
     }
 
     public async Task<IReadOnlyList<AppointmentProfessionalItemResponse>> GetMyScheduleAsync(
-    string email,
-    CancellationToken cancellationToken = default)
+        string email, CancellationToken cancellationToken = default)
     {
         var professional = await _professionalRepository.GetByEmailAsync(
-            email.Trim().ToLowerInvariant(),
-            cancellationToken)
+            email.Trim().ToLowerInvariant(), cancellationToken)
             ?? throw new BusinessRuleException(
                 "Profissional não encontrado para o usuário logado.");
 
         var appointments = await _appointmentRepository.GetByProfessionalIdAsync(
-            professional.Id,
-            cancellationToken);
+            professional.Id, cancellationToken);
 
-        return appointments
-            .Select(AppointmentProfessionalItemResponse.FromEntity)
-            .ToList();
+        return appointments.Select(AppointmentProfessionalItemResponse.FromEntity).ToList();
     }
 
     public async Task EnsureProfessionalOwnsAsync(
-        int appointmentId,
-        string email,
-        CancellationToken cancellationToken = default)
+        int appointmentId, string email, CancellationToken cancellationToken = default)
     {
         var professional = await _professionalRepository.GetByEmailAsync(
-            email.Trim().ToLowerInvariant(),
-            cancellationToken);
+            email.Trim().ToLowerInvariant(), cancellationToken);
 
         var appointment = await _appointmentRepository.GetByIdAsync(
-            appointmentId,
-            cancellationToken);
+            appointmentId, cancellationToken);
 
         if (professional is null || appointment is null ||
             appointment.ProfessionalId != professional.Id)
@@ -339,4 +299,6 @@ public class AppointmentService : IAppointmentService
         }
     }
 
+    private static string FormatWhen(DateTime date) =>
+        $"{date:dd/MM/yyyy} às {date:HH:mm}";
 }
