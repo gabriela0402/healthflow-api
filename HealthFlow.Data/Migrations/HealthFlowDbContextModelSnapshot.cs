@@ -90,6 +90,45 @@ namespace HealthFlow.Data.Migrations
                     b.ToTable("Settings");
                 });
 
+            modelBuilder.Entity("HealthFlow.Model.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AppointmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("HealthFlow.Model.Entities.Patient", b =>
                 {
                     b.Property<int>("Id")
@@ -126,6 +165,15 @@ namespace HealthFlow.Data.Migrations
 
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("NotifyAppointmentUpdates")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifyEmail")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NotifyReminders")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
@@ -274,6 +322,17 @@ namespace HealthFlow.Data.Migrations
                     b.Navigation("Patient");
 
                     b.Navigation("Professional");
+                });
+
+            modelBuilder.Entity("HealthFlow.Model.Entities.Notification", b =>
+                {
+                    b.HasOne("HealthFlow.Model.Entities.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("HealthFlow.Model.Entities.Professional", b =>

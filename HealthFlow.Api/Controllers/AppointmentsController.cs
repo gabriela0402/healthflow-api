@@ -93,7 +93,8 @@ public class AppointmentsController : ControllerBase
     }
 
     [HttpPut("{id:int}/cancel")]
-    [Authorize(Roles = "Admin,Professional")]
+    [Authorize(Roles = "Admin,Professional,Patient")]
+
     public async Task<ActionResult<AppointmentResponse>> Cancel(
         int id,
         CancellationToken cancellationToken)
