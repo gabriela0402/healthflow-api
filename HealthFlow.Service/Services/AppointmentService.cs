@@ -101,6 +101,12 @@ public class AppointmentService : IAppointmentService
             $"{FormatWhen(scheduledAt)}.",
             cancellationToken);
 
+        await _notificationService.NotifyProfessionalAsync(
+            professional,
+            "Nova consulta agendada",
+            $"{patient.FullName} agendou uma consulta para {FormatWhen(scheduledAt)}.",
+            cancellationToken);
+
         await _appointmentRepository.SaveChangesAsync(cancellationToken);
 
         return AppointmentResponse.FromEntity(appointment);

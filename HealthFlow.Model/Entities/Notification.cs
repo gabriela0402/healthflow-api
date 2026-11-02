@@ -3,8 +3,13 @@
 public class Notification
 {
     public int Id { get; private set; }
-    public int PatientId { get; private set; }
-    public Patient Patient { get; private set; } = null!;
+
+    public int? PatientId { get; private set; }
+    public Patient? Patient { get; private set; }
+
+    public int? ProfessionalId { get; private set; }
+    public Professional? Professional { get; private set; }
+
     public int? AppointmentId { get; private set; }
     public string Type { get; private set; } = "system"; // appointment | reminder | system
     public string Title { get; private set; } = string.Empty;
@@ -23,6 +28,20 @@ public class Notification
         Description = description;
         AppointmentId = appointmentId;
         CreatedAt = DateTime.Now;
+    }
+
+    public static Notification ForProfessional(int professionalId, string type,
+        string title, string description, int? appointmentId = null)
+    {
+        return new Notification
+        {
+            ProfessionalId = professionalId,
+            Type = type,
+            Title = title,
+            Description = description,
+            AppointmentId = appointmentId,
+            CreatedAt = DateTime.Now,
+        };
     }
 
     public void MarkAsRead() => IsRead = true;

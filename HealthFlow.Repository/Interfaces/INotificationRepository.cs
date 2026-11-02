@@ -19,4 +19,10 @@ public interface INotificationRepository
     Task AddAsync(Notification notification, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Notification>> GetByProfessionalIdAsync(
+    int professionalId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Notification>> GetUnreadByProfessionalIdAsync(
+        int professionalId, CancellationToken cancellationToken = default);
 }

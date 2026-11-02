@@ -51,4 +51,19 @@ public class NotificationRepository : INotificationRepository
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         => await _context.SaveChangesAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<Notification>> GetByProfessionalIdAsync(
+    int professionalId, CancellationToken cancellationToken = default)
+    => await _context.Notifications
+        .AsNoTracking()
+        .Where(n => n.ProfessionalId == professionalId)
+        .OrderByDescending(n => n.CreatedAt)
+        .Take(50)
+        .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<Notification>> GetUnreadByProfessionalIdAsync(
+        int professionalId, CancellationToken cancellationToken = default)
+        => await _context.Notifications
+            .Where(n => n.ProfessionalId == professionalId && !n.IsRead)
+            .ToListAsync(cancellationToken);
 }

@@ -12,13 +12,17 @@ public class NotificationService : INotificationService
     private readonly IPatientRepository _patients;
     private readonly IClinicSettingsRepository _settings;
 
+    private readonly IProfessionalRepository _professionals;
+
     public NotificationService(
         INotificationRepository notifications,
         IPatientRepository patients,
+        IProfessionalRepository professionals,
         IClinicSettingsRepository settings)
     {
         _notifications = notifications;
         _patients = patients;
+        _professionals = professionals;
         _settings = settings;
     }
 
@@ -128,5 +132,59 @@ public class NotificationService : INotificationService
         return await _patients.GetByEmailAsync(email.Trim().ToLowerInvariant(), cancellationToken)
                ?? throw new BusinessRuleException(
                    "Paciente não encontrado para o usuário logado.");
+    }
+
+    public async Task NotifyProfessionalAsync(
+    Professional professional, string title, string description,
+    CancellationToken cancellationToken = default)
+    {
+        await _notifications.AddAsync(
+            Notification.ForProfessional(professional.Id, "appointment", title, description),
+            cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<NotificationResponse>> GetMineAsProfessionalAsync(
+        string email, CancellationToken cancellationToken = default)
+    {
+        var professional = await GetProfessionalAsync(email, cancellationToken);
+        var list = await _notifications.GetByProfessionalIdAsync(professional.Id, cancellationToken);
+
+        return list.Select(NotificationResponse.FromEntity).ToList();
+    }
+
+    public async Task MarkAsReadAsProfessionalAsync(
+        string email, int id, CancellationToken cancellationToken = default)
+    {
+        var professional = await GetProfessionalAsync(email, cancellationToken);
+        var notification = await _notifications.GetByIdAsync(id, cancellationToken);
+
+        if (notification is null || notification.ProfessionalId != professional.Id)
+        {
+            throw new BusinessRuleException("Notificação não encontrada.");
+        }
+
+        notification.MarkAsRead();
+        await _notifications.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task MarkAllAsReadAsProfessionalAsync(
+        string email, CancellationToken cancellationToken = default)
+    {
+        var professional = await GetProfessionalAsync(email, cancellationToken);
+        var unread = await _notifications.GetUnreadByProfessionalIdAsync(
+            professional.Id, cancellationToken);
+
+        foreach (var notification in unread) notification.MarkAsRead();
+
+        await _notifications.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<Professional> GetProfessionalAsync(
+        string email, CancellationToken cancellationToken)
+    {
+        return await _professionals.GetByEmailAsync(
+                   email.Trim().ToLowerInvariant(), cancellationToken)
+               ?? throw new BusinessRuleException(
+                   "Profissional não encontrado para o usuário logado.");
     }
 }

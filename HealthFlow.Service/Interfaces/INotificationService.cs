@@ -24,4 +24,17 @@ public interface INotificationService
         CancellationToken cancellationToken = default);
 
     Task SendRemindersAsync(CancellationToken cancellationToken = default);
+
+    Task NotifyProfessionalAsync(
+    Professional professional, string title, string description,
+    CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<NotificationResponse>> GetMineAsProfessionalAsync(
+        string email, CancellationToken cancellationToken = default);
+
+    Task MarkAsReadAsProfessionalAsync(
+        string email, int id, CancellationToken cancellationToken = default);
+
+    Task MarkAllAsReadAsProfessionalAsync(
+        string email, CancellationToken cancellationToken = default);
 }

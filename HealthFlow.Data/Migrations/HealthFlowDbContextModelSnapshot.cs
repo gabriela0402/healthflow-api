@@ -111,7 +111,10 @@ namespace HealthFlow.Data.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.Property<int>("PatientId")
+                    b.Property<int?>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProfessionalId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -125,6 +128,8 @@ namespace HealthFlow.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PatientId");
+
+                    b.HasIndex("ProfessionalId");
 
                     b.ToTable("Notifications");
                 });
@@ -328,11 +333,15 @@ namespace HealthFlow.Data.Migrations
                 {
                     b.HasOne("HealthFlow.Model.Entities.Patient", "Patient")
                         .WithMany()
-                        .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PatientId");
+
+                    b.HasOne("HealthFlow.Model.Entities.Professional", "Professional")
+                        .WithMany()
+                        .HasForeignKey("ProfessionalId");
 
                     b.Navigation("Patient");
+
+                    b.Navigation("Professional");
                 });
 
             modelBuilder.Entity("HealthFlow.Model.Entities.Professional", b =>
