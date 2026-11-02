@@ -24,4 +24,7 @@ public interface IPatientRepository
 
     Task<IReadOnlyList<Patient>> GetAllWithAppointmentsAsync(
         CancellationToken cancellationToken = default);
+
+    Task<bool> HasAppointmentsAsync(int id, CancellationToken cancellationToken = default);
+    void Remove(Patient patient);
 }

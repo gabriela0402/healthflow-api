@@ -25,4 +25,13 @@ public interface IPatientService
 
     Task<IReadOnlyList<PatientListItemResponse>> GetOverviewAsync(
         CancellationToken cancellationToken = default);
+
+    Task<PatientProfileResponse> GetProfileByIdAsync(
+    int id, CancellationToken cancellationToken = default);
+
+    Task<PatientProfileResponse> UpdateByIdAsync(
+        int id, UpdatePatientProfileRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(int id, CancellationToken cancellationToken = default);
 }

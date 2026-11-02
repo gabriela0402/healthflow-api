@@ -98,4 +98,24 @@ public class PatientsController : ControllerBase
     {
         return Ok(await _patientService.GetOverviewAsync(cancellationToken));
     }
+
+    [HttpGet("{id:int}/profile")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<PatientProfileResponse>> GetProfile(
+    int id, CancellationToken cancellationToken)
+    => Ok(await _patientService.GetProfileByIdAsync(id, cancellationToken));
+
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<PatientProfileResponse>> Update(
+        int id, UpdatePatientProfileRequest request, CancellationToken cancellationToken)
+        => Ok(await _patientService.UpdateByIdAsync(id, request, cancellationToken));
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        await _patientService.DeleteAsync(id, cancellationToken);
+        return NoContent();
+    }
 }

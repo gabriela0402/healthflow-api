@@ -64,4 +64,16 @@ public class PatientRepository : IPatientRepository
             .OrderBy(patient => patient.FullName)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<bool> HasAppointmentsAsync(
+    int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Appointments
+            .AnyAsync(a => a.PatientId == id, cancellationToken);
+    }
+
+    public void Remove(Patient patient)
+    {
+        _context.Patients.Remove(patient);
+    }
 }

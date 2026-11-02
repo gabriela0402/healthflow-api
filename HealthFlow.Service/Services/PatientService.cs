@@ -288,5 +288,119 @@ public sealed class PatientService : IPatientService
             .ToList();
     }
 
+    public async Task<PatientProfileResponse> UpdateMyProfileAsync(
+    string email,
+    UpdatePatientProfileRequest request,
+    CancellationToken cancellationToken = default)
+    {
+        var patient = await GetPatientByEmailOrThrowAsync(email, cancellationToken);
+
+        await ApplyProfileAsync(patient, request, cancellationToken);
+        await _patientRepository.SaveChangesAsync(cancellationToken);
+
+        return PatientProfileResponse.FromEntity(patient);
+    }
+
+    public async Task<PatientProfileResponse> GetProfileByIdAsync(
+        int id, CancellationToken cancellationToken = default)
+    {
+        var patient = await _patientRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new BusinessRuleException("Paciente não encontrado.");
+
+        return PatientProfileResponse.FromEntity(patient);
+    }
+
+    public async Task<PatientProfileResponse> UpdateByIdAsync(
+        int id,
+        UpdatePatientProfileRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var patient = await _patientRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new BusinessRuleException("Paciente não encontrado.");
+
+        await ApplyProfileAsync(patient, request, cancellationToken);
+        await _patientRepository.SaveChangesAsync(cancellationToken);
+
+        return PatientProfileResponse.FromEntity(patient);
+    }
+
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var patient = await _patientRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new BusinessRuleException("Paciente não encontrado.");
+
+        if (await _patientRepository.HasAppointmentsAsync(id, cancellationToken))
+        {
+            throw new BusinessRuleException(
+                "Não é possível excluir: o paciente possui agendamentos. " +
+                "Cancele ou remova os agendamentos antes.");
+        }
+
+        var user = await _userRepository.GetByEmailAsync(patient.Email, cancellationToken);
+
+        if (user is not null && user.Role == "Patient")
+        {
+            _userRepository.Remove(user);
+        }
+
+        _patientRepository.Remove(patient);
+
+        await _patientRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ApplyProfileAsync(
+        Patient patient,
+        UpdatePatientProfileRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.FullName) ||
+            request.FullName.Trim().Length < 3)
+        {
+            throw new BusinessRuleException(
+                "O nome completo deve possuir pelo menos 3 caracteres.");
+        }
+
+        DateTime? dateOfBirth = null;
+
+        if (request.DateOfBirth.HasValue)
+        {
+            var birth = request.DateOfBirth.Value.Date;
+
+            if (birth > DateTime.UtcNow.Date || birth.Year <= 1900)
+            {
+                throw new BusinessRuleException("A data de nascimento é inválida.");
+            }
+
+            dateOfBirth = birth;
+        }
+
+        string? cpf = null;
+
+        if (!string.IsNullOrWhiteSpace(request.Cpf))
+        {
+            cpf = new string(request.Cpf.Where(char.IsDigit).ToArray());
+
+            if (!IsValidCpf(cpf))
+            {
+                throw new BusinessRuleException("O CPF informado é inválido.");
+            }
+        }
+
+        var fullName = request.FullName.Trim();
+
+        patient.UpdateProfile(
+            fullName,
+            NullIfEmpty(request.Phone),
+            dateOfBirth,
+            NullIfEmpty(request.Gender),
+            cpf,
+            NullIfEmpty(request.Address),
+            NullIfEmpty(request.EmergencyContactName),
+            NullIfEmpty(request.EmergencyContactPhone));
+
+        var user = await _userRepository.GetByEmailAsync(patient.Email, cancellationToken);
+        user?.SetName(fullName);
+    }
+
 
 }
